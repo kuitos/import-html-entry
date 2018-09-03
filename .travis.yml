@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+- 8
+cache:
+  directories:
+  - node_modules
+
+before_deploy:
+- npm run build
+- cp {package.json,README.md,.npmignore} dist
+- cd dist
+deploy:
+  provider: npm
+  email: kuitos.lau@gmail.com
+  api_key: $NPM_AUTH_TOKEN
+  skip_cleanup: true
+  on:
+    tags: true

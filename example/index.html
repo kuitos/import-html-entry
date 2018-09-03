@@ -35,84 +35,85 @@
 				scripts[seq].push(matchedScriptSrc[2]);
 			}
 
-			return `<!-- script ${matchedScriptSrc[2]} replaced -->`;
-		});
+			return `<!-- script ${matchedScriptSrc[2]} replaced -->`
+		;
+                });
 
-		return {
-			template,
-			scripts: scripts.filter(function (script) {
-				// 过滤空的索引
-				return !!script;
-			})
-		};
+                return {
+                    template,
+                    scripts: scripts.filter(function (script) {
+                        // 过滤空的索引
+                        return !!script;
+                    })
+                };
 
-	}
+            }
 
-		function loadScripts(scriptUrlList) {
+                function loadScripts(scriptUrlList) {
 
-			const promises = scriptUrlList.map(scriptUrl => {
+                    const promises = scriptUrlList.map(scriptUrl => {
 
-				let loaded = false;
-				let script = document.createElement('script');
-				script.async = false;
-				script.src = scriptUrl;
+                        let loaded = false;
+                        let script = document.createElement('script');
+                        script.async = false;
+                        script.src = scriptUrl;
 
-				return new Promise((resolve, reject) => {
+                        return new Promise((resolve, reject) => {
 
-					if (loadedScripts.indexOf(scriptUrl) === -1) {
+                            if (loadedScripts.indexOf(scriptUrl) === -1) {
 
-						script.onload = () => {
-							resolve();
-							loadedScripts.push(scriptUrl);
-							// helpful for gc
-							script = null;
-						};
+                                script.onload = () => {
+                                    resolve();
+                                    loadedScripts.push(scriptUrl);
+                                    // helpful for gc
+                                    script = null;
+                                };
 
-						// onreadystatechange only works in IE
-						script.onreadystatechange = () => {
+                                // onreadystatechange only works in IE
+                                script.onreadystatechange = () => {
 
-							if (('loaded' === script.readyState || 'complete' === script.readyState) && !loaded) {
-								loaded = true;
-								script.onload();
-							}
-						};
+                                    if (('loaded' === script.readyState || 'complete' === script.readyState) && !loaded) {
+                                        loaded = true;
+                                        script.onload();
+                                    }
+                                };
 
-						script.onerror = ev => reject(ev);
+                                script.onerror = ev => reject(ev);
 
-						document.head.appendChild(script);
+                                document.head.appendChild(script);
 
-					} else {
-						resolve();
-					}
-				});
-			});
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
 
-			return Promise.all(promises);
-		}
+                    return Promise.all(promises);
+                }
 
-		function importHTML(url) {
+                function importHTML(url) {
 
-			return fetch(url)
-				.then(response => response.text())
-				.then(html => {
-					const { template, scripts } = processTpl(html);
+                    return fetch(url)
+                        .then(response => response.text())
+                        .then(html => {
+                            const { template, scripts } = processTpl(html);
 
-					window.module = { exports: {} };
-					window.exports = {};
-					return loadScripts(scripts).then(() => {
+                            window.module = { exports: {} };
+                            window.exports = {};
+                            return loadScripts(scripts).then(() => {
 
-						const result = {
-							template,
-							exports: module.exports
-						};
+                                const result = {
+                                    template,
+                                    exports: module.exports
+                                };
 
-						delete window.module;
-						delete window.exports;
+                                delete window.module;
+                                delete window.exports;
 
-						return result;
-					});
-				});
-		}
+                                return result;
+                            });
+                        });
+                }
 </script>
 
 

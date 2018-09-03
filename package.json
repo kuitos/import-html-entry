@@ -2,12 +2,14 @@
   "name": "html-import",
   "version": "1.0.0",
   "description": "import html and get the exports of entry",
-  "main": "index.js",
+  "main": "./import-html.js",
   "directories": {
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -fr dist && rollup -c",
+    "build:example": "rollup -c rollup.config.js --o ./example/bundle.js --f umd --name 'importHTML'"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,19 @@
   "bugs": {
     "url": "https://github.com/kuitos/html-import/issues"
   },
-  "homepage": "https://github.com/kuitos/html-import#readme"
+  "homepage": "https://github.com/kuitos/html-import#readme",
+  "dependencies": {
+    "systemjs": "^0.21.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "rollup": "^0.65.0",
+    "rollup-plugin-babel": "^4.0.2",
+    "rollup-plugin-commonjs": "^9.1.6",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
+  }
 }
