@@ -6,7 +6,7 @@
 
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/gi;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
-const SCRIPT_ENTRY_REGEX = /.*\sentry\s+.*/;
+const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 
 /**
  * 从模版中解析出script外链脚本
@@ -22,15 +22,20 @@ export default function processTpl(tpl) {
 	const template = tpl.replace(SCRIPT_TAG_REGEX, match => {
 
 		const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
-		const matchedScriptSrc = match.match(SCRIPT_SRC_REGEX);
+		const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
+		const matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
 
-		entry = matchedScriptEntry ? matchedScriptSrc : null;
-
-		if (matchedScriptSrc && matchedScriptSrc[2]) {
-			scripts.push(matchedScriptSrc[2]);
+		if (entry && matchedScriptEntry) {
+			throw new SyntaxError('You should not set multiply entry script!');
+		} else {
+			entry = entry || (matchedScriptEntry && matchedScriptSrc);
 		}
 
-		return `<!-- script ${matchedScriptSrc[2]} replaced -->`;
+		if (matchedScriptSrc) {
+			scripts.push(matchedScriptSrc);
+		}
+
+		return `<!-- script ${matchedScriptSrc} replaced -->`;
 	});
 
 	return {
