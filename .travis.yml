@@ -7,8 +7,8 @@ cache:
 
 before_deploy:
 - npm run build
-- cp {package.json,README.md,.npmignore} dist
-- cd dist
+- cp {package.json,README.md,.npmignore} lib
+- cd lib
 deploy:
   provider: npm
   email: kuitos.lau@gmail.com
