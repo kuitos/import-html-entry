@@ -1,5 +1,5 @@
 {
-  "name": "html-import",
+  "name": "import-html-entry",
   "version": "0.0.1",
   "description": "import html and get the exports of entry",
   "main": "./import-html.js",
