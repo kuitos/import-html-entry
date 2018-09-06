@@ -5,9 +5,12 @@ cache:
   directories:
   - node_modules
 
+script:
+  - npm run lint
+
 before_deploy:
 - npm run build
-- cp {package.json,README.md,.npmignore} lib
+- cp {package.json,README.md} lib
 - cd lib
 deploy:
   provider: npm
