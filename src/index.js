@@ -4,7 +4,7 @@
  * @since 2018-08-15 11:37
  */
 
-import 'systemjs';
+import System from 'systemjs';
 import processTpl from './process-tpl';
 
 export default function importHTML(url) {
@@ -27,4 +27,4 @@ export default function importHTML(url) {
 					}, reject))
 			);
 		});
-}
+};

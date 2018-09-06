@@ -1,7 +1,7 @@
 # html-import
-import html and handle the exports from the entry
-
 A html loader for single-spa
+
+Treats the index html as entry, fetch the template and exports.  
 
 ```html
 <!-- subApp/index.html -->
