@@ -2,13 +2,13 @@
   "name": "import-html-entry",
   "version": "0.0.1",
   "description": "import html and get the exports of entry",
-  "main": "./import-html.js",
+  "main": "./import-html-entry.js",
   "directories": {
     "example": "example"
   },
   "scripts": {
     "lint": "echo \"Error: no lint specified\"",
-    "build": "rm -fr ./lib && webpack --display normal"
+    "build": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal"
   },
   "repository": {
     "type": "git",
