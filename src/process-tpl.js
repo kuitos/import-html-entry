@@ -9,14 +9,13 @@ const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 
 /**
- * 从模版中解析出script外链脚本
- * tpl 处理后的模版字符串 scripts:提取出来的脚本链接
+ * parse the script link from the template
  * @param tpl
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
 export default function processTpl(tpl) {
 
-	const scripts = [];
+	let scripts = [];
 	let entry = null;
 
 	const template = tpl.replace(SCRIPT_TAG_REGEX, match => {
@@ -38,12 +37,15 @@ export default function processTpl(tpl) {
 		return `<!-- script ${matchedScriptSrc} replaced -->`;
 	});
 
+	scripts = scripts.filter(function (script) {
+		// filter empty script
+		return !!script;
+	});
+
 	return {
 		template,
-		scripts: scripts.filter(function (script) {
-			// 过滤空的索引
-			return !!script;
-		}),
-		entry
+		scripts,
+		// set the first script as entry if have not set
+		entry: entry || scripts[0],
 	};
 }
