@@ -21,9 +21,9 @@
   "author": "Kuitos",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kuitos/html-import/issues"
+    "url": "https://github.com/kuitos/import-html-entry/issues"
   },
-  "homepage": "https://github.com/kuitos/html-import#readme",
+  "homepage": "https://github.com/kuitos/import-html-entry#readme",
   "browserslist": [
     "> 1%",
     "last 2 versions",
