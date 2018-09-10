@@ -45,7 +45,7 @@ export default function processTpl(tpl) {
 	return {
 		template,
 		scripts,
-		// set the first script as entry if have not set
-		entry: entry || scripts[0],
+		// set the last script as entry if have not set
+		entry: entry || scripts[scripts.length - 1],
 	};
 }
