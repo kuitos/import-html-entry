@@ -20,16 +20,18 @@ Treats the index html as entry, fetch the template and exports.
 ```
 
 ```js
-import importHTML from 'html-import';
+import importHTML from 'html-import-entry';
 
 importHTML('./subApp/index.html')
     .then(res => {
-    	console.log(res.template);
-    	
-    	const mobx = res.exports;
-    	const { observable } = mobx;
-    	observable({
-    	    name: 'kuitos'
-    	})
-    });
+        console.log(res.template);
+
+        res.loadScripts().then(exports => {
+            const mobx = exports;
+            const { observable } = mobx;
+            observable({
+                name: 'kuitos'
+            })	
+        })
+});
 ```

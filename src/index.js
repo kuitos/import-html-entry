@@ -14,17 +14,20 @@ export default function importHTML(url) {
 		.then(html => {
 			const { template, scripts, entry } = processTpl(html);
 
-			return new Promise((resolve, reject) =>
+			return {
+				template,
+				// return the entry script exports
+				loadScripts() {
+					return new Promise((resolve, reject) =>
 
-				scripts.map(script =>
-					System.import(script).then(exports => {
-						if (script === entry) {
-							resolve({
-								template,
-								exports
-							});
-						}
-					}, reject))
-			);
+						scripts.map(script =>
+							System.import(script).then(exports => {
+								if (script === entry) {
+									resolve(exports);
+								}
+							}, reject)),
+					);
+				},
+			};
 		});
 };

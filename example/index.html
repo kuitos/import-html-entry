@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>index</title>
+	<meta charset="UTF-8">
+	<title>index</title>
 </head>
 <body>
 <script src="../lib/import-html-entry.js"></script>
 <script>
 
 	importHTML('./template.html').then(res => {
-		console.log(res);
+		console.log(res.template);
+		res.loadScripts().then(exports => {
+			console.log(exports);
+		});
 	});
 
 </script>
