@@ -1,7 +1,5 @@
-# html-import
-A html loader for single-spa
-
-Treats the index html as entry, fetch the template and exports.  
+# import-html-entry
+Treats the index html as manifest and loads the assets(css,js), and get the entry script exports.
 
 ```html
 <!-- subApp/index.html -->
@@ -14,7 +12,9 @@ Treats the index html as entry, fetch the template and exports.
 </head>
 <body>
 
-<script src="https://unpkg.com/mobx@5.0.3/lib/mobx.umd.js"></script>
+<!-- mark the entry script with entry attribute -->
+<script src="https://unpkg.com/mobx@5.0.3/lib/mobx.umd.js" entry></script>
+<script src="https://unpkg.com/react@16.4.2/umd/react.production.min.js"></script>
 </body>
 </html>
 ```
