@@ -26,7 +26,7 @@
   "homepage": "https://github.com/kuitos/import-html-entry#readme",
   "browserslist": [
     "> 1%",
-    "last 2 versions",
+    "last 10 versions",
     "not ie <= 8"
   ],
   "dependencies": {
@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.0.0",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2",

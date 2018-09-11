@@ -18,14 +18,23 @@ export default function importHTML(url) {
 				template,
 				// return the entry script exports
 				loadScripts() {
-					return new Promise((resolve, reject) =>
 
-						scripts.map(script =>
-							System.import(script).then(exports => {
-								if (script === entry) {
-									resolve(exports);
-								}
-							}, reject)),
+					// TODO performance improvement
+					return new Promise((resolve, reject) => {
+
+							let promiseChain = Promise.resolve();
+
+							scripts.reduce((chain, script) => {
+
+								chain = chain.then(() => System.import(script).then(exports => {
+									if (script === entry) {
+										resolve(exports);
+									}
+								}), reject);
+
+								return chain;
+							}, promiseChain);
+						},
 					);
 				},
 			};
