@@ -13,7 +13,7 @@ const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
  * @param tpl
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl) {
+export default function processTpl(tpl, domain) {
 
 	let scripts = [];
 	let entry = null;
@@ -22,12 +22,18 @@ export default function processTpl(tpl) {
 
 		const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
 		const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
-		const matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
+		let matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
 
 		if (entry && matchedScriptEntry) {
 			throw new SyntaxError('You should not set multiply entry script!');
 		} else {
-			entry = entry || (matchedScriptEntry && matchedScriptSrc);
+
+			// append the domain while the script not have an protocol prefix
+			if(matchedScriptSrc && (!matchedScriptSrc.startsWith('//') && !matchedScriptSrc.startsWith('http'))) {
+				matchedScriptSrc = domain + matchedScriptSrc;
+			}
+
+			entry = entry || matchedScriptEntry && matchedScriptSrc;
 		}
 
 		if (matchedScriptSrc) {

@@ -7,12 +7,23 @@
 import System from 'systemjs';
 import processTpl from './process-tpl';
 
+function getDomain(url) {
+	try {
+		const href = new URL(url);
+		return href.origin;
+	} catch (e) {
+		return '';
+	}
+}
+
 export default function importHTML(url) {
+
+	const domain = getDomain(url);
 
 	return fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry } = processTpl(html);
+			const { template, scripts, entry } = processTpl(html, domain);
 
 			return {
 				template,
