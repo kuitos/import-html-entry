@@ -4,7 +4,9 @@
  * @since 2018-08-15 11:37
  */
 
-import System from 'systemjs';
+import loadjs from 'loadjs';
+import 'systemjs/dist/extras/global';
+import 'systemjs/dist/s';
 import processTpl from './process-tpl';
 
 function getDomain(url) {
@@ -14,6 +16,12 @@ function getDomain(url) {
 	} catch (e) {
 		return '';
 	}
+}
+
+function promisifySyncLoadjs(scripts) {
+	return new Promise((resolve, reject) => scripts.length
+		? loadjs(scripts, { async: false, success: resolve, error: reject })
+		: resolve());
 }
 
 export default function importHTML(url) {
@@ -30,23 +38,16 @@ export default function importHTML(url) {
 				// return the entry script exports
 				loadScripts() {
 
-					// TODO performance improvement
-					return new Promise((resolve, reject) => {
+					const entryIndex = scripts.indexOf(entry);
+					const preScripts = scripts.slice(0, entryIndex);
+					const postScripts = scripts.slice(entryIndex + 1);
 
-							let promiseChain = Promise.resolve();
+					let exports = null;
 
-							scripts.reduce((chain, script) => {
-
-								chain = chain.then(() => System.import(script).then(exports => {
-									if (script === entry) {
-										resolve(exports);
-									}
-								}), reject);
-
-								return chain;
-							}, promiseChain);
-						},
-					);
+					return promisifySyncLoadjs(preScripts)
+						.then(() => exports = System.import(entry))
+						.then(promisifySyncLoadjs(postScripts))
+						.then(() => exports);
 				},
 			};
 		});

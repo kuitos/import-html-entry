@@ -13,7 +13,7 @@ module.exports = env => {
 
 	return {
 		entry: {
-			[appName]: './src/index.js'
+			[appName]: './src/index.js',
 		},
 		devtool: 'source-map',
 		output: {
@@ -21,28 +21,24 @@ module.exports = env => {
 			filename: '[name].js',
 			libraryTarget: 'umd',
 			library: 'importHTML',
-			libraryExport: 'default'
+			libraryExport: 'default',
 		},
 		mode: 'production',
 		optimization: {
-			minimize
+			minimize,
 		},
 		node: {
-			process: false
-		},
-		resolve: {
-			alias: {
-				systemjs: path.resolve(__dirname, './node_modules/systemjs/dist/system-production.src.js')
-			}
+			process: false,
 		},
 		module: {
 			rules: [
+				{ parser: { system: false } },
 				{
 					test: '/\.js$/',
 					use: 'babel-loader',
-					exclude: '/node_modules/'
-				}
-			]
-		}
+					exclude: '/node_modules/',
+				},
+			],
+		},
 	};
 };
