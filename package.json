@@ -7,8 +7,9 @@
     "example": "example"
   },
   "scripts": {
-    "lint": "echo \"Error: no lint specified\"",
-    "build": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal"
+    "lint": "npm test",
+    "build": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -33,11 +34,33 @@
     "systemjs": "^0.21.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
+    "@babel/core": "^7.2.2",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
+    "@babel/runtime": "^7.2.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.2",
+    "jest": "^23.6.0",
+    "regenerator-runtime": "^0.13.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
+  },
+  "jest": {
+    "globals": {
+      "process.env.NODE_ENV": "test"
+    },
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/fixtures/"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/",
+      "/dist/"
+    ]
   }
 }
