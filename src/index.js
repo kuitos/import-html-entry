@@ -18,7 +18,7 @@ function getDomain(url) {
 	}
 }
 
-function promisifySyncLoadjs(scripts) {
+function promisifySeriesLoadjs(scripts) {
 	return new Promise((resolve, reject) => scripts.length
 		? loadjs(scripts, { async: false, success: resolve, error: reject })
 		: resolve());
@@ -45,9 +45,9 @@ export default function importHTML(url) {
 					let exports = null;
 					const System = window.System;
 
-					return promisifySyncLoadjs(preScripts)
+					return promisifySeriesLoadjs(preScripts)
 						.then(() => exports = System.import(entry))
-						.then(promisifySyncLoadjs(postScripts))
+						.then(promisifySeriesLoadjs(postScripts))
 						.then(() => exports);
 				},
 			};
