@@ -43,6 +43,7 @@ export default function importHTML(url) {
 					const postScripts = scripts.slice(entryIndex + 1);
 
 					let exports = null;
+					const System = window.System;
 
 					return promisifySyncLoadjs(preScripts)
 						.then(() => exports = System.import(entry))
