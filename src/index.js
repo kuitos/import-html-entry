@@ -5,8 +5,9 @@
  */
 
 import loadjs from 'loadjs';
+import 'systemjs/dist/extras/amd';
+import 'systemjs/dist/extras/named-exports';
 import 'systemjs/dist/s';
-import 'systemjs/dist/extras/global';
 import processTpl from './process-tpl';
 
 function getDomain(url) {
