@@ -65,7 +65,7 @@ export default function importHTML(url) {
 					return promisifySeriesLoadjs(preScripts)
 						.then(() => {
 							mountSystemJS();
-							exports = System.import(entry);
+							exports = window.System.import(entry);
 							return exports.then(unmountSystemJS);
 						})
 						.then(promisifySeriesLoadjs(postScripts))
