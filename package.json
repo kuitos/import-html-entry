@@ -2,7 +2,7 @@
   "name": "import-html-entry",
   "version": "0.1.10",
   "description": "import html and get the exports of entry",
-  "main": "./import-html-entry.js",
+  "main": "./import-html-entry.min.js",
   "directories": {
     "example": "example"
   },

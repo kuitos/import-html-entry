@@ -5,9 +5,6 @@
  */
 
 import loadjs from 'loadjs';
-import 'systemjs/dist/s';
-import 'systemjs/dist/extras/amd';
-import 'systemjs/dist/extras/named-exports';
 import processTpl from './process-tpl';
 
 function getDomain(url) {
@@ -23,6 +20,26 @@ function promisifySeriesLoadjs(scripts) {
 	return new Promise((resolve, reject) => scripts.length
 		? loadjs(scripts, { async: false, success: resolve, error: reject })
 		: resolve());
+}
+
+let init = false;
+let globalDefine = null;
+
+function mountSystemJS() {
+	if (!init) {
+		// as systemjs will pollute the global variables, lazy mount systemjs
+		require('systemjs/dist/s');
+		require('systemjs/dist/extras/amd');
+		require('systemjs/dist/extras/named-exports');
+		init = true;
+		globalDefine = window.define;
+	} else {
+		window.define = globalDefine;
+	}
+}
+
+function unmountSystemJS() {
+	delete window.define;
 }
 
 export default function importHTML(url) {
@@ -44,10 +61,13 @@ export default function importHTML(url) {
 					const postScripts = scripts.slice(entryIndex + 1);
 
 					let exports = null;
-					const System = window.System;
 
 					return promisifySeriesLoadjs(preScripts)
-						.then(() => exports = System.import(entry))
+						.then(() => {
+							mountSystemJS();
+							exports = System.import(entry);
+							return exports.then(unmountSystemJS);
+						})
 						.then(promisifySeriesLoadjs(postScripts))
 						.then(() => exports);
 				},
