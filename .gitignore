@@ -25,4 +25,5 @@ hs_err_pid*
 example/bundle.js
 example/bundle.js.map
 lib/
-node_modules
+esm/
+node_modules/

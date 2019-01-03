@@ -17,7 +17,7 @@ module.exports = env => {
 		},
 		devtool: 'source-map',
 		output: {
-			path: path.resolve(__dirname, './lib'),
+			path: path.resolve(__dirname, './dist'),
 			filename: '[name].js',
 			libraryTarget: 'umd',
 			library: 'importHTML',

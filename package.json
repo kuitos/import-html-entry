@@ -2,13 +2,20 @@
   "name": "import-html-entry",
   "version": "0.1.12",
   "description": "import html and get the exports of entry",
-  "main": "./import-html-entry.min.js",
+  "main": "./dist/import-html-entry.min.js",
+  "module": "./esm/index.js",
   "directories": {
     "example": "example"
   },
+  "files": [
+    "dist",
+    "esm"
+  ],
   "scripts": {
     "lint": "npm test",
-    "build": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal",
+    "build": "npm run build:dist && npm run build:esm",
+    "build:dist": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal",
+    "build:esm": "rm -fr ./esm && babel ./src --out-dir ./esm --ignore 'src/**/__tests__/**/*.js'",
     "test": "jest"
   },
   "repository": {
@@ -35,6 +42,7 @@
     "systemjs": "^2.1.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/preset-env": "^7.0.0",

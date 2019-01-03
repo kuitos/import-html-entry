@@ -10,8 +10,6 @@ script:
 
 before_deploy:
 - npm run build
-- cp {package.json,README.md} lib
-- cd lib
 deploy:
   provider: npm
   email: kuitos.lau@gmail.com
