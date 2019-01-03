@@ -35,3 +35,8 @@ importHTML('./subApp/index.html')
         })
 });
 ```
+
+Never forget to add this config to your webpack to disable System transpliation, see https://github.com/kuitos/import-html-entry/blob/master/webpack.config.js#L35:
+```json
+{ parser: { system: false } },
+```
