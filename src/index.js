@@ -42,14 +42,14 @@ function unmountSystemJS() {
 	delete window.define;
 }
 
-export default function importHTML(url) {
+export default function importHTML(url, stripStyles) {
 
 	const domain = getDomain(url);
 
 	return fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry } = processTpl(html, domain);
+			const { template, scripts, entry } = processTpl(html, domain, stripStyles);
 
 			return {
 				template,
