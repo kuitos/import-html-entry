@@ -17,27 +17,47 @@ function hasProtocol(url) {
 
 /**
  * parse the script link from the template
+ * TODO
+ *    1. collect stylesheets
+ *    2. use global eval to evaluate the inline scripts
+ *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
+ *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
  * @param domain
+ * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain) {
+export default function processTpl(tpl, domain, stripStyles = false) {
 
 	let scripts = [];
+	const styles = [];
 	let entry = null;
 
 	const template = tpl
 
-		// change the css link
 		.replace(LINK_TAG_REGEX, match => {
+
+			/*
+			change the css link
+			 */
 
 			const styleType = !!match.match(STYLE_TYPE_REGEX);
 			if (styleType) {
+
 				const styleHref = match.match(STYLE_HREF_REGEX);
 				if (styleHref) {
+
 					const href = styleHref && styleHref[2];
+					let newHref = href;
+
 					if (href && !hasProtocol(href)) {
-						const newHref = domain + href;
+						newHref = domain + href;
+					}
+
+					if (stripStyles) {
+						styles.push(newHref);
+						return `<!-- link ${newHref} replaced -->`;
+					} else if (newHref !== href) {
 						return match.replace(href, newHref);
 					}
 				}
@@ -47,6 +67,10 @@ export default function processTpl(tpl, domain) {
 		})
 
 		.replace(SCRIPT_TAG_REGEX, match => {
+
+			/*
+			collect scripts and replace the ref
+			 */
 
 			const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
 			const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
@@ -80,6 +104,7 @@ export default function processTpl(tpl, domain) {
 	return {
 		template,
 		scripts,
+		styles,
 		// set the last script as entry if have not set
 		entry: entry || scripts[scripts.length - 1],
 	};

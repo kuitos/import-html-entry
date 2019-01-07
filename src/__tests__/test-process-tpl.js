@@ -38,5 +38,10 @@ test('test process-tpl', () => {
 		'http://kuitos.me/umi.js',
 	]);
 	expect(template.indexOf('http://kuitos.me/umi.css') !== -1).toBeTruthy();
+	expect(template.indexOf('<!-- script http://kuitos.me/umi.js replaced -->') !== -1).toBeTruthy();
+
+	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me', true);
+	expect(styles[0]).toBe('http://kuitos.me/umi.css');
+	expect(template2.indexOf('<!-- link http://kuitos.me/umi.css replaced -->') !== -1).toBeTruthy();
 
 });
