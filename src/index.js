@@ -49,10 +49,17 @@ export default function importHTML(url, stripStyles) {
 	return fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry } = processTpl(html, domain, stripStyles);
+			const { template, scripts, entry, styles } = processTpl(html, domain, stripStyles);
 
 			return {
 				template,
+				getStyles() {
+					return stripStyles ?
+						Promise
+							.all(styles.map(styleLink => fetch(styleLink).then(response => response.text())))
+							.then(styleSheets => styleSheets.join(''))
+						: Promise.resolve('');
+				},
 				// return the entry script exports
 				loadScripts() {
 
