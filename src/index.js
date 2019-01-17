@@ -7,15 +7,6 @@
 import loadjs from 'loadjs';
 import processTpl from './process-tpl';
 
-function getDomain(url) {
-	try {
-		const href = new URL(url);
-		return href.origin;
-	} catch (e) {
-		return '';
-	}
-}
-
 function promisifySeriesLoadjs(scripts) {
 	return new Promise((resolve, reject) => scripts.length
 		? loadjs(scripts, { async: false, success: resolve, error: reject })
@@ -40,6 +31,15 @@ function mountSystemJS() {
 
 function unmountSystemJS() {
 	delete window.define;
+}
+
+export function getDomain(url) {
+	try {
+		const href = new URL(url);
+		return href.origin;
+	} catch (e) {
+		return '';
+	}
 }
 
 export default function importHTML(url, stripStyles) {
