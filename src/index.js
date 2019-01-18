@@ -35,7 +35,8 @@ function unmountSystemJS() {
 
 export function getDomain(url) {
 	try {
-		const href = new URL(url);
+		// URL 构造函数不支持使用 // 前缀的 url
+		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
 		return href.origin;
 	} catch (e) {
 		return '';

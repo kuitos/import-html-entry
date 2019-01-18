@@ -51,7 +51,8 @@ export default function processTpl(tpl, domain, stripStyles = false) {
 					let newHref = href;
 
 					if (href && !hasProtocol(href)) {
-						newHref = domain + href;
+						// 处理一下使用相对路径的场景
+						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
 					}
 
 					if (stripStyles) {
