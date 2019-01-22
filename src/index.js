@@ -20,7 +20,7 @@ function mountSystemJS() {
 	if (!init) {
 		// as systemjs will pollute the global variables, lazy mount systemjs
 		require('systemjs/dist/s');
-		require('systemjs/dist/extras/amd');
+		require('systemjs/dist/extras/global');
 		require('systemjs/dist/extras/named-exports');
 		init = true;
 		globalDefine = window.define;
