@@ -15,6 +15,9 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http');
 }
 
+export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
+export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
+
 /**
  * parse the script link from the template
  * TODO
@@ -27,7 +30,7 @@ function hasProtocol(url) {
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain, stripStyles = false) {
+export default function processTpl(tpl, domain) {
 
 	let scripts = [];
 	const styles = [];
@@ -55,12 +58,8 @@ export default function processTpl(tpl, domain, stripStyles = false) {
 						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
 					}
 
-					if (stripStyles) {
-						styles.push(newHref);
-						return `<!-- link ${newHref} replaced -->`;
-					} else if (newHref !== href) {
-						return match.replace(href, newHref);
-					}
+					styles.push(newHref);
+					return genLinkReplaceSymbol(newHref);
 				}
 			}
 
@@ -91,7 +90,7 @@ export default function processTpl(tpl, domain, stripStyles = false) {
 
 			if (matchedScriptSrc) {
 				scripts.push(matchedScriptSrc);
-				return `<!-- script ${matchedScriptSrc} replaced -->`;
+				return genScriptReplaceSymbol(matchedScriptSrc);
 			}
 
 			return match;

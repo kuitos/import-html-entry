@@ -1,4 +1,4 @@
-import processTpl from '../process-tpl';
+import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from '../process-tpl';
 
 test('test process-tpl', () => {
 
@@ -37,11 +37,11 @@ test('test process-tpl', () => {
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'http://kuitos.me/umi.js',
 	]);
-	expect(template.indexOf('http://kuitos.me/umi.css') !== -1).toBeTruthy();
-	expect(template.indexOf('<!-- script http://kuitos.me/umi.js replaced -->') !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 
-	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me', true);
+	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
-	expect(template2.indexOf('<!-- link http://kuitos.me/umi.css replaced -->') !== -1).toBeTruthy();
+	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });

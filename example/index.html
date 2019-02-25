@@ -10,7 +10,7 @@
 
 	importHTML('./template.html').then(res => {
 		console.log(res.template);
-		res.loadScripts().then(exports => {
+		res.execScript().then(exports => {
 			console.log(exports);
 		});
 	});

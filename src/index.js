@@ -4,36 +4,10 @@
  * @since 2018-08-15 11:37
  */
 
-import loadjs from 'loadjs';
-import processTpl from './process-tpl';
+import processTpl, { genLinkReplaceSymbol } from './process-tpl';
+import { getGlobalProp, noteGlobalProps } from './utils';
 
-function promisifySeriesLoadjs(scripts) {
-	return new Promise((resolve, reject) => scripts.length
-		? loadjs(scripts, { async: false, success: resolve, error: reject })
-		: resolve());
-}
-
-let init = false;
-let globalDefine = null;
-
-function mountSystemJS() {
-	if (!init) {
-		// as systemjs will pollute the global variables, lazy mount systemjs
-		require('systemjs/dist/s');
-		require('systemjs/dist/extras/global');
-		require('systemjs/dist/extras/named-exports');
-		init = true;
-		globalDefine = window.define;
-	} else {
-		window.define = globalDefine;
-	}
-}
-
-function unmountSystemJS() {
-	delete window.define;
-}
-
-export function getDomain(url) {
+function getDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
@@ -43,42 +17,64 @@ export function getDomain(url) {
 	}
 }
 
-export default function importHTML(url, stripStyles) {
+const styleCache = {};
+const scriptCache = {};
+const embedHTMLCache = {};
+
+export default function importHTML(url) {
 
 	const domain = getDomain(url);
 
-	return fetch(url)
+	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry, styles } = processTpl(html, domain, stripStyles);
+			const { template, scripts, entry, styles } = processTpl(html, domain);
 
-			return {
-				template,
-				getStyles() {
-					return stripStyles ?
-						Promise
-							.all(styles.map(styleLink => fetch(styleLink).then(response => response.text())))
-							.then(styleSheets => styleSheets.join(''))
-						: Promise.resolve('');
-				},
-				// return the entry script exports
-				loadScripts() {
+			function getEmbedHTML() {
 
-					const entryIndex = scripts.indexOf(entry);
-					const preScripts = scripts.slice(0, entryIndex);
-					const postScripts = scripts.slice(entryIndex + 1);
+				let emberHTML = template;
 
-					let exports = null;
+				return getExternalStyleSheets()
+					.then(styleSheets => {
+						emberHTML = styles.reduce((html, styleSrc, i) => {
+							html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
+							return html;
+						}, emberHTML);
 
-					return promisifySeriesLoadjs(preScripts)
-						.then(() => {
-							mountSystemJS();
-							exports = window.System.import(entry);
-							return exports.then(unmountSystemJS);
-						})
-						.then(promisifySeriesLoadjs(postScripts))
-						.then(() => exports);
-				},
-			};
-		});
+						return emberHTML;
+					});
+			}
+
+			function getExternalStyleSheets() {
+				return styleCache[url] ||
+					(styleCache[url] = Promise.all(styles.map(styleLink => fetch(styleLink).then(response => response.text()))));
+
+			}
+
+			function getExternalScripts() {
+				return scriptCache[url] ||
+					(scriptCache[url] = Promise.all(scripts.map(script => fetch(script).then(response => response.text()))));
+			}
+
+			function execScript(proxy = window) {
+
+				return getExternalScripts()
+					.then(scriptsText => {
+						const inlineScript = scriptsText.join(';');
+						noteGlobalProps();
+						window.proxy = proxy;
+						const geval = eval;
+						geval(`;(function(window){${inlineScript}})(window.proxy);`);
+						const exports = proxy[getGlobalProp()];
+						return exports;
+					});
+			}
+
+			return getEmbedHTML().then(embedHTML => ({
+				template: embedHTML,
+				getExternalScripts,
+				getExternalStyleSheets,
+				execScript,
+			}));
+		}));
 };

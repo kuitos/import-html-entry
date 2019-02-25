@@ -38,10 +38,6 @@
     "last 10 versions",
     "not ie <= 8"
   ],
-  "dependencies": {
-    "loadjs": "^3.5.5",
-    "systemjs": "^2.1.1"
-  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
