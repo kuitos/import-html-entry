@@ -60,13 +60,56 @@ export default function importHTML(url) {
 
 				return getExternalScripts()
 					.then(scriptsText => {
-						const inlineScript = scriptsText.join(';');
-						noteGlobalProps();
+
 						window.proxy = proxy;
 						const geval = eval;
-						geval(`;(function(window){${inlineScript}})(window.proxy);`);
-						const exports = proxy[getGlobalProp()];
-						return exports;
+
+						function exec(scriptSrc, inlineScript, nextTick, resolve) {
+
+							const markName = `Evaluating script ${scriptSrc}`;
+							const measureName = `Evaluating Time Consuming: ${scriptSrc}`;
+
+							if (process.env.NODE_ENV === 'development') {
+								performance.mark(markName);
+							}
+
+							if (scriptSrc === entry) {
+								noteGlobalProps();
+								geval(`;(function(window){;${inlineScript}})(window.proxy);`);
+								const exports = proxy[getGlobalProp()] || {};
+								resolve(exports);
+							} else {
+								geval(`;(function(window){;${inlineScript}})(window.proxy);`);
+							}
+
+							if (process.env.NODE_ENV === 'development') {
+								performance.measure(measureName, markName);
+								performance.clearMarks(markName);
+								performance.clearMeasures(measureName);
+							}
+
+							nextTick();
+						}
+
+						function schedule(i, resolve) {
+
+							if (i < scripts.length) {
+								const scriptSrc = scripts[i];
+								const inlineScript = scriptsText[i];
+								const nextTick = schedule.bind(null, ++i, resolve);
+								const execScriptBinding = exec.bind(null, scriptSrc, inlineScript, nextTick, resolve);
+
+								// 约 2M 以上的代码延迟执行
+								if (inlineScript.length / 1000 / 1000 > 2) {
+									// 把时间放出去，确保大文件的执行是完全处于浏览器闲置状态
+									setTimeout(execScriptBinding, 200);
+								} else {
+									window.requestIdleCallback(execScriptBinding);
+								}
+							}
+						}
+
+						return new Promise(resolve => schedule(0, resolve));
 					});
 			}
 
