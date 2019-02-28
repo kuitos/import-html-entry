@@ -56,7 +56,7 @@ export default function importHTML(url) {
 					(scriptCache[url] = Promise.all(scripts.map(script => fetch(script).then(response => response.text()))));
 			}
 
-			function execScript(proxy = window) {
+			function execScripts(proxy = window) {
 
 				return getExternalScripts()
 					.then(scriptsText => {
@@ -117,7 +117,7 @@ export default function importHTML(url) {
 				template: embedHTML,
 				getExternalScripts,
 				getExternalStyleSheets,
-				execScript,
+				execScripts,
 			}));
 		}));
 };
