@@ -64,7 +64,7 @@ export default function importHTML(url) {
 						window.proxy = proxy;
 						const geval = eval;
 
-						function exec(scriptSrc, inlineScript, nextTick, resolve) {
+						function exec(scriptSrc, inlineScript, resolve) {
 
 							const markName = `Evaluating script ${scriptSrc}`;
 							const measureName = `Evaluating Time Consuming: ${scriptSrc}`;
@@ -87,25 +87,18 @@ export default function importHTML(url) {
 								performance.clearMarks(markName);
 								performance.clearMeasures(measureName);
 							}
-
-							nextTick();
 						}
 
-						function schedule(i, resolve) {
+						function schedule(i, resolvePromise) {
 
 							if (i < scripts.length) {
 								const scriptSrc = scripts[i];
 								const inlineScript = scriptsText[i];
-								const nextTick = schedule.bind(null, ++i, resolve);
-								const execScriptBinding = exec.bind(null, scriptSrc, inlineScript, nextTick, resolve);
 
-								// 约 2M 以上的代码延迟执行
-								if (inlineScript.length / 1000 / 1000 > 2) {
-									// 把时间放出去，确保大文件的执行是完全处于浏览器闲置状态
-									setTimeout(execScriptBinding, 200);
-								} else {
-									window.requestIdleCallback(execScriptBinding);
-								}
+								window.requestIdleCallback(() => {
+									exec(scriptSrc, inlineScript, resolvePromise);
+									schedule(i + 1, resolvePromise);
+								});
 							}
 						}
 
