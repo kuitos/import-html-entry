@@ -75,11 +75,11 @@ export default function importHTML(url) {
 
 							if (scriptSrc === entry) {
 								noteGlobalProps();
-								geval(`;(function(window){;${inlineScript}})(window.proxy);`);
+								geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
 								const exports = proxy[getGlobalProp()] || {};
 								resolve(exports);
 							} else {
-								geval(`;(function(window){;${inlineScript}})(window.proxy);`);
+								geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
 							}
 
 							if (process.env.NODE_ENV === 'development') {
