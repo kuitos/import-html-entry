@@ -26,11 +26,11 @@ export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} rep
  *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
  *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
- * @param domain
+ * @param dirUrl
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain) {
+export default function processTpl(tpl, dirUrl) {
 
 	let scripts = [];
 	const styles = [];
@@ -55,7 +55,7 @@ export default function processTpl(tpl, domain) {
 
 					if (href && !hasProtocol(href)) {
 						// 处理一下使用相对路径的场景
-						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
+						newHref = dirUrl + (href.startsWith('/') ? href : `/${href}`);
 					}
 
 					styles.push(newHref);
@@ -82,7 +82,7 @@ export default function processTpl(tpl, domain) {
 
 				// append the domain while the script not have an protocol prefix
 				if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-					matchedScriptSrc = domain + matchedScriptSrc;
+					matchedScriptSrc = dirUrl + matchedScriptSrc;
 				}
 
 				entry = entry || matchedScriptEntry && matchedScriptSrc;

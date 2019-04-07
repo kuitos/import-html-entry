@@ -13,12 +13,12 @@ const embedHTMLCache = {};
 
 export default function importHTML(url) {
 
-	const domain = getDomain(url);
+	const dirUrl = dirname(url);
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry, styles } = processTpl(html, domain);
+			const { template, scripts, entry, styles } = processTpl(html, dirUrl);
 
 			function getEmbedHTML() {
 

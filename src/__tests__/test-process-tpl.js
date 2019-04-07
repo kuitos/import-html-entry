@@ -40,8 +40,8 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 
-	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me');
-	expect(styles[0]).toBe('http://kuitos.me/umi.css');
-	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
+	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
+	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
+	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
 
 });
