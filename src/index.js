@@ -5,17 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { getGlobalProp, noteGlobalProps } from './utils';
-
-export function getDomain(url) {
-	try {
-		// URL 构造函数不支持使用 // 前缀的 url
-		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
-		return href.origin;
-	} catch (e) {
-		return '';
-	}
-}
+import { dirname, getGlobalProp, noteGlobalProps } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -75,11 +65,25 @@ export default function importHTML(url) {
 
 							if (scriptSrc === entry) {
 								noteGlobalProps();
-								geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+
+								try {
+									geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+								} catch (e) {
+									console.error(`error occurs while executing the entry ${scriptSrc}`);
+									console.error(e);
+								}
+
 								const exports = proxy[getGlobalProp()] || {};
 								resolve(exports);
+
 							} else {
-								geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+								try {
+									geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+								} catch (e) {
+									console.error(`error occurs while executing ${scriptSrc}`);
+									console.error(e);
+								}
+
 							}
 
 							if (process.env.NODE_ENV === 'development') {
