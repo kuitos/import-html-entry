@@ -99,10 +99,8 @@ export default function importHTML(url) {
 								const scriptSrc = scripts[i];
 								const inlineScript = scriptsText[i];
 
-								window.requestIdleCallback(() => {
-									exec(scriptSrc, inlineScript, resolvePromise);
-									schedule(i + 1, resolvePromise);
-								});
+								exec(scriptSrc, inlineScript, resolvePromise);
+								schedule(i + 1, resolvePromise);
 							}
 						}
 
