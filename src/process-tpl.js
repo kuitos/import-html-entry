@@ -15,7 +15,7 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http');
 }
 
-function getBaseUrl(url) {
+function getBaseDomain(url) {
 	return url.endsWith('/') ? url.substr(0, url.length - 1) : url;
 }
 
@@ -30,11 +30,11 @@ export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} rep
  *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
  *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
- * @param dirUrl
+ * @param domain
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, dirUrl) {
+export default function processTpl(tpl, domain) {
 
 	let scripts = [];
 	const styles = [];
@@ -59,7 +59,7 @@ export default function processTpl(tpl, dirUrl) {
 
 					if (href && !hasProtocol(href)) {
 						// 处理一下使用相对路径的场景
-						newHref = getBaseUrl(dirUrl) + (href.startsWith('/') ? href : `/${href}`);
+						newHref = getBaseDomain(domain) + (href.startsWith('/') ? href : `/${href}`);
 					}
 
 					styles.push(newHref);
@@ -86,7 +86,7 @@ export default function processTpl(tpl, dirUrl) {
 
 				// append the domain while the script not have an protocol prefix
 				if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-					matchedScriptSrc = getBaseUrl(dirUrl) + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
+					matchedScriptSrc = getBaseDomain(domain) + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
 				}
 
 				entry = entry || matchedScriptEntry && matchedScriptSrc;

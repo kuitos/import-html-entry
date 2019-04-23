@@ -5,22 +5,28 @@
  */
 
 import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { dirname, getGlobalProp, hasNoPath, noteGlobalProps } from './utils';
+import { getGlobalProp, noteGlobalProps } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
 
-export default function importHTML(inputUrl) {
+function getDomain(url) {
+	try {
+		// URL 构造函数不支持使用 // 前缀的 url
+		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
+		return href.origin;
+	} catch (e) {
+		return '';
+	}
+}
 
-	const url = inputUrl.startsWith('//') ? `${location.protocol}${inputUrl}` : inputUrl;
-	// 没有 path 的地址直接使用，如 https://abc.com
-	const dirUrl = hasNoPath(url) ? url : dirname(url);
+export default function importHTML(url) {
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
-			const { template, scripts, entry, styles } = processTpl(html, dirUrl);
+			const { template, scripts, entry, styles } = processTpl(html, getDomain(url));
 
 			function getEmbedHTML() {
 
