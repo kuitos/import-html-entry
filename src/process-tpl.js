@@ -55,7 +55,8 @@ export default function processTpl(tpl, dirUrl) {
 
 					if (href && !hasProtocol(href)) {
 						// 处理一下使用相对路径的场景
-						newHref = dirUrl + (href.startsWith('/') ? href : `/${href}`);
+						const baseUrl = dirUrl.endsWith('/') ? dirUrl.substr(0, dirUrl.length - 1) : dirUrl;
+						newHref = baseUrl + (href.startsWith('/') ? href : `/${href}`);
 					}
 
 					styles.push(newHref);
