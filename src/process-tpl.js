@@ -15,6 +15,10 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http');
 }
 
+function getBaseUrl(url) {
+	return url.endsWith('/') ? url.substr(0, url.length - 1) : url;
+}
+
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 
@@ -55,8 +59,7 @@ export default function processTpl(tpl, dirUrl) {
 
 					if (href && !hasProtocol(href)) {
 						// 处理一下使用相对路径的场景
-						const baseUrl = dirUrl.endsWith('/') ? dirUrl.substr(0, dirUrl.length - 1) : dirUrl;
-						newHref = baseUrl + (href.startsWith('/') ? href : `/${href}`);
+						newHref = getBaseUrl(dirUrl) + (href.startsWith('/') ? href : `/${href}`);
 					}
 
 					styles.push(newHref);
@@ -83,7 +86,7 @@ export default function processTpl(tpl, dirUrl) {
 
 				// append the domain while the script not have an protocol prefix
 				if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-					matchedScriptSrc = dirUrl + matchedScriptSrc;
+					matchedScriptSrc = getBaseUrl(dirUrl) + matchedScriptSrc;
 				}
 
 				entry = entry || matchedScriptEntry && matchedScriptSrc;
