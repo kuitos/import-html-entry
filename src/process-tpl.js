@@ -86,7 +86,7 @@ export default function processTpl(tpl, dirUrl) {
 
 				// append the domain while the script not have an protocol prefix
 				if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-					matchedScriptSrc = getBaseUrl(dirUrl) + matchedScriptSrc;
+					matchedScriptSrc = getBaseUrl(dirUrl) + matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`;
 				}
 
 				entry = entry || matchedScriptEntry && matchedScriptSrc;
