@@ -11,8 +11,9 @@ const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
 
-export default function importHTML(url) {
+export default function importHTML(inputUrl) {
 
+	const url = inputUrl.startsWith('//') ? `${location.protocol}${inputUrl}` : inputUrl;
 	// 没有 path 的地址直接使用，如 https://abc.com
 	const dirUrl = hasNoPath(url) ? url : dirname(url);
 
