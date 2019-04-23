@@ -159,3 +159,8 @@ export function dirname(path) {
 
 	return path.slice(0, end);
 }
+
+export function hasNoPath(url) {
+	const u = new URL(url);
+	return u.pathname === '/';
+}

@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { dirname, getGlobalProp, noteGlobalProps } from './utils';
+import { dirname, getGlobalProp, hasNoPath, noteGlobalProps } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -13,7 +13,8 @@ const embedHTMLCache = {};
 
 export default function importHTML(url) {
 
-	const dirUrl = dirname(url);
+	// 没有 path 的地址直接使用，如 https://abc.com
+	const dirUrl = hasNoPath(url) ? url : dirname(url);
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
