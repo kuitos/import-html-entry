@@ -10,6 +10,7 @@ const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
+const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
 
 function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http');
@@ -41,6 +42,11 @@ export default function processTpl(tpl, domain) {
 	let entry = null;
 
 	const template = tpl
+
+		/*
+		remove html comment first
+		*/
+		.replace(HTML_COMMENT_REGEX, '')
 
 		.replace(LINK_TAG_REGEX, match => {
 
