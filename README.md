@@ -20,7 +20,7 @@ Treats the index html as manifest and loads the assets(css,js), and get the entr
 ```
 
 ```js
-import importHTML from 'html-import-entry';
+import importHTML from 'import-html-entry';
 
 importHTML('./subApp/index.html')
     .then(res => {
