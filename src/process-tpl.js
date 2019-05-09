@@ -13,7 +13,7 @@ const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
 
 function hasProtocol(url) {
-	return url.startsWith('//') || url.startsWith('http');
+	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
 
 function getBaseDomain(url) {
