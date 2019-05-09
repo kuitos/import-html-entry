@@ -27,6 +27,13 @@ test('test process-tpl', () => {
 		'<div id="root"></div>\n' +
 		'\n' +
 		'<script src="/umi.js"></script>\n' +
+		'<!-- <script src="/a1.js"></script>' + 
+		'-->'
+		'<!-- <script src="/a2.js"></script>\n' + 
+		'-->'
+		'<!--[if IE 6]>\n'+
+		'Special instructions for IE 6 here\n' +
+		'<![endif]-->'
 		'\n' +
 		'\n' +
 		'</body></html>';
