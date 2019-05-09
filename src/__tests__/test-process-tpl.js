@@ -27,25 +27,28 @@ test('test process-tpl', () => {
 		'<div id="root"></div>\n' +
 		'\n' +
 		'<script src="/umi.js"></script>\n' +
-		'<!-- <script src="/a1.js"></script>' + 
-		'-->'
-		'<!-- <script src="/a2.js"></script>\n' + 
-		'-->'
-		'<!--[if IE 6]>\n'+
+		'<!-- <script src="/a1.js"></script>' +
+		'-->' +
+		'<script src="/comment.js"></script>\n' +
+		'<!-- <script src="/a2.js"></script>\n' +
+		'-->' +
+		'<!--[if IE 6]>\n' +
 		'<!-- <script src="/a3-ie6-polyfill.js"></script>\n' +
-		'<![endif]-->'
+		'<![endif]-->' +
 		'\n' +
 		'\n' +
 		'</body></html>';
 
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
-	expect(entry).toBe('http://kuitos.me/umi.js');
+	expect(entry).toBe('http://kuitos.me/comment.js');
 	expect(scripts).toEqual([
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'http://kuitos.me/umi.js',
+		'http://kuitos.me/comment.js',
 	]);
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
