@@ -32,7 +32,7 @@ test('test process-tpl', () => {
 		'<!-- <script src="/a2.js"></script>\n' + 
 		'-->'
 		'<!--[if IE 6]>\n'+
-		'Special instructions for IE 6 here\n' +
+		'<!-- <script src="/a3-ie6-polyfill.js"></script>\n' +
 		'<![endif]-->'
 		'\n' +
 		'\n' +
