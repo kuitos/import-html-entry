@@ -1,5 +1,6 @@
 /**
- * @author 有知 <youzhi.lk@antfin.com>
+ * @author Kuitos
+ * @homepage https://github.com/kuitos/
  * @since 2019-02-25
  */
 
@@ -46,9 +47,9 @@ export function noteGlobalProps() {
 	return lastGlobalProp;
 }
 
-function assertPath(path) {
+export function assertPath(path) {
 	if (typeof path !== 'string') {
-		throw new TypeError('Path must be a string. Received ' + inspect(path));
+		throw new TypeError('Path must be a string. Received ' + path);
 	}
 }
 
