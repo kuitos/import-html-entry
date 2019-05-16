@@ -97,10 +97,7 @@ export default function processTpl(tpl, domain) {
 			// in order to keep the exec order of all javascripts
 
 			// if it is a external script
-			console.log(match, SCRIPT_TAG_REGEX, SCRIPT_TAG_REGEX.test(match))
-			console.log(match, SCRIPT_TAG_REGEX, SCRIPT_TAG_REGEX.test(match))
 			if(SCRIPT_TAG_REGEX.test(match)){
-				console.log(match)
 				/*
 				collect scripts and replace the ref
 				*/
