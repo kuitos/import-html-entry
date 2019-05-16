@@ -46,7 +46,7 @@ test('test process-tpl', () => {
 
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
 	expect(entry).toBe('http://kuitos.me/comment.js');
-	expect(scripts).toEqual([
+	expect(scripts).toEqual([ '<script>\n  window.routerBase = "/";\n</script>',
 	'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 	'http://kuitos.me/umi.js',
 	'http://kuitos.me/comment.js' ]);
