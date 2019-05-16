@@ -31,7 +31,6 @@ function getEmbedHTML(template, styles) {
 				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
 				return html;
 			}, embedHTML);
-
 			return embedHTML;
 		});
 }
@@ -79,8 +78,6 @@ function execScripts(entry, scripts, proxy = window) {
 
 	return getExternalScripts(scripts)
 		.then(scriptsText => {
-
-			console.log('test:', scriptsText)
 
 			window.proxy = proxy;
 			const geval = eval;
