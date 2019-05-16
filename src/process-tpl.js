@@ -26,6 +26,8 @@ function getBaseDomain(url) {
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
+export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`
+export const inlineLinkReplaceSymbol = `<!-- inline styles replaced by import-html-entry -->`
 
 /**
  * parse the script link from the template
@@ -87,6 +89,7 @@ export default function processTpl(tpl, domain) {
 				// const end = match.lastIndexOf('<');
 				// const code = match.substring(start, end);
 				styles.push(match);
+				return inlineLinkReplaceSymbol;
 			}
 		})
 
