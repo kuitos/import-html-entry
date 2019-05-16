@@ -7,11 +7,10 @@
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const ALL_STYLE_REGEX = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>|<(link)\s+.*?>/gi;
 
-const INLINE_STYLE_REGEX = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi;
-const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/gi;
+const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/i;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
-const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
+const LINK_TAG_REGEX = /<(link)\s+.*?>/i;
 const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
@@ -98,7 +97,10 @@ export default function processTpl(tpl, domain) {
 			// in order to keep the exec order of all javascripts
 
 			// if it is a external script
+			console.log(match, SCRIPT_TAG_REGEX, SCRIPT_TAG_REGEX.test(match))
+			console.log(match, SCRIPT_TAG_REGEX, SCRIPT_TAG_REGEX.test(match))
 			if(SCRIPT_TAG_REGEX.test(match)){
+				console.log(match)
 				/*
 				collect scripts and replace the ref
 				*/
