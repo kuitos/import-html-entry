@@ -56,7 +56,6 @@ test('test process-tpl', () => {
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
-	expect(styles[1]).toBe(`<style>\nbody {\nbackground-color: red;\n}\n</style>`);
 	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
 
 });

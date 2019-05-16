@@ -5,12 +5,11 @@
  */
 
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-const ALL_STYLE_REGEX = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>|<(link)\s+.*?>/gi;
 
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/i;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
-const LINK_TAG_REGEX = /<(link)\s+.*?>/i;
+const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
@@ -26,7 +25,6 @@ function getBaseDomain(url) {
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`
-export const inlineLinkReplaceSymbol = `<!-- inline styles replaced by import-html-entry -->`
 
 /**
  * parse the script link from the template
@@ -57,7 +55,6 @@ export default function processTpl(tpl, domain) {
 			/*
 			change the css link
 			*/
-
 			const styleType = !!match.match(STYLE_TYPE_REGEX);
 			if (styleType) {
 
