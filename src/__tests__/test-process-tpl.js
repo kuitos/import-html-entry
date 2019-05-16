@@ -21,6 +21,11 @@ test('test process-tpl', () => {
 		'\n' +
 		'</script>\n' +
 		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
+		'<style>\n' +
+		'body {\n' +
+		'background-color: red;\n' +
+		'}\n' +
+		'</style>\n' +
 		'</head>\n' +
 		'<body>\n' +
 		'\n' +
@@ -41,7 +46,6 @@ test('test process-tpl', () => {
 
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
 	expect(entry).toBe('http://kuitos.me/comment.js');
-	console.log(scripts);
 	expect(scripts).toEqual([ '<script>\n  window.routerBase = "/";\n</script>',
 	`<script>\n\n// bigfish version: 2.7.2\n// umi version: 2.2.8\n// build time: Wed Dec 26 2018 17:54:47 GMT+0800 (CST)\n\n</script>`,
 	'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
@@ -53,6 +57,7 @@ test('test process-tpl', () => {
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
+	expect(styles[1]).toBe(`<style>\nbody {\nbackground-color: red;\n}\n</style>`);
 	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
 
 });
