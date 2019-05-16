@@ -42,9 +42,9 @@ function getExternalStyleSheets(styles) {
 			{
 				if(styleLink.startsWith('<')){
 					// if it is inline style
-					const start = script.indexOf('>') + 1;
-					const end = script.lastIndexOf('<');
-					const code = script.substring(start, end);
+					const start = styleLink.indexOf('>') + 1;
+					const end = styleLink.lastIndexOf('<');
+					const code = styleLink.substring(start, end);
 					return code;
 				} else {
 					// external styles
@@ -57,9 +57,8 @@ function getExternalStyleSheets(styles) {
 }
 
 // for prefetch
-function getExternalScripts() {
-	return scriptCache[url] ||
-		(scriptCache[url] = Promise.all(scripts.map(script => 
+function getExternalScripts(scripts) {
+	return Promise.all(scripts.map(script => 
 			{
 				if(script.startsWith('<')){
 					// if it is inline script
@@ -69,16 +68,19 @@ function getExternalScripts() {
 					return code;
 				} else {
 					// external script
-					return fetch(script).then(response => response.text());
+					return scriptCache[script] ||
+					(scriptCache[script] = fetch(script).then(response => response.text()))
 				}
 			}
-		)))
+		))
 };
 
 function execScripts(entry, scripts, proxy = window) {
 
 	return getExternalScripts(scripts)
 		.then(scriptsText => {
+
+			console.log('test:', scriptsText)
 
 			window.proxy = proxy;
 			const geval = eval;

@@ -133,7 +133,7 @@ export default function processTpl(tpl, domain) {
 
 				// remove script blocks when all of these lines are comments.
 				const isPureCommentBlock = code.split(/[\r\n]+/).reduce((isComment, line) => {
-						return isComment && line.trim().startsWith('//');
+						return isComment && (!line.trim() || line.trim().startsWith('//'));
 				}, true)
 
 				if(!isPureCommentBlock){
