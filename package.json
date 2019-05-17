@@ -9,8 +9,10 @@
   },
   "files": [
     "dist",
-    "esm"
+    "esm",
+    "index.d.ts"
   ],
+  "types": "./index.d.ts",
   "scripts": {
     "lint": "npm test",
     "build": "npm run build:dist && npm run build:esm",

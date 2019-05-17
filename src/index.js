@@ -134,14 +134,14 @@ export function importEntry(entry) {
 	}
 
 	// html entry
-	if (entry.endsWith('.html')) {
+	if (typeof entry === 'string') {
 		return importHTML(entry);
 	}
 
 	// config entry
 	if (Array.isArray(entry.scripts) || Array.isArray(entry.styles)) {
 
-		const { scripts, styles, html = '' } = entry;
+		const { scripts = [], styles = [], html = '' } = entry;
 
 		return Promise.resolve({
 			template: html,
