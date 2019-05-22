@@ -167,12 +167,12 @@ export function importEntry(entry) {
 
 		const { scripts = [], styles = [], html = '' } = entry;
 
-		return Promise.resolve({
-			template: html,
+		return getEmbedHTML(html, styles).then(embedHTML => ({
+			template: embedHTML,
 			getExternalScripts: () => getExternalScripts(scripts),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles),
 			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy),
-		});
+		}));
 
 	} else {
 		throw new SyntaxError('entry scripts or styles should be array!');
