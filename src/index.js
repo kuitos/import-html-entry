@@ -31,22 +31,48 @@ function getEmbedHTML(template, styles) {
 				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
 				return html;
 			}, embedHTML);
-
 			return embedHTML;
 		});
 }
 
 // for prefetch
 function getExternalStyleSheets(styles) {
-	return Promise.all(styles.map(styleLink => styleCache[styleLink] ||
-		(styleCache[styleLink] = fetch(styleLink).then(response => response.text()))));
+	return Promise.all(styles.map(styleLink => 
+			{
+				if(styleLink.startsWith('<')){
+					// if it is inline style
+					const start = styleLink.indexOf('>') + 1;
+					const end = styleLink.lastIndexOf('<');
+					const code = styleLink.substring(start, end);
+					return code;
+				} else {
+					// external styles
+					return styleCache[styleLink] ||
+					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()))
+				}
+				
+			}
+		));
 }
 
 // for prefetch
 function getExternalScripts(scripts) {
-	return Promise.all(scripts.map(script => scriptCache[script] ||
-		(scriptCache[script] = fetch(script).then(response => response.text()))));
-}
+	return Promise.all(scripts.map(script => 
+			{
+				if(script.startsWith('<')){
+					// if it is inline script
+					const start = script.indexOf('>') + 1;
+					const end = script.lastIndexOf('<');
+					const code = script.substring(start, end);
+					return code;
+				} else {
+					// external script
+					return scriptCache[script] ||
+					(scriptCache[script] = fetch(script).then(response => response.text()))
+				}
+			}
+		))
+};
 
 function execScripts(entry, scripts, proxy = window) {
 
