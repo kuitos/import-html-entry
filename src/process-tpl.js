@@ -3,9 +3,9 @@
  * @homepage https://github.com/kuitos/
  * @since 2018-09-03 15:04
  */
+import { getInlineCode } from './utils';
 
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/i;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
@@ -24,7 +24,7 @@ function getBaseDomain(url) {
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
-export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`
+export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 
 /**
  * parse the script link from the template
@@ -81,7 +81,7 @@ export default function processTpl(tpl, domain) {
 			// in order to keep the exec order of all javascripts
 
 			// if it is a external script
-			if(SCRIPT_TAG_REGEX.test(match)){
+			if (SCRIPT_TAG_REGEX.test(match)) {
 				/*
 				collect scripts and replace the ref
 				*/
@@ -108,25 +108,20 @@ export default function processTpl(tpl, domain) {
 				}
 
 				return match;
-			} 
-			// if it is an inline script
-			else {
-				const start = match.indexOf('>') + 1;
-				const end = match.lastIndexOf('<');
-				const code = match.substring(start, end);
+			} else {
+				// if it is an inline script
+				const code = getInlineCode(match);
 
 				// remove script blocks when all of these lines are comments.
-				const isPureCommentBlock = code.split(/[\r\n]+/).reduce((isComment, line) => {
-						return isComment && (!line.trim() || line.trim().startsWith('//'));
-				}, true)
+				const isPureCommentBlock = code.split(/[\r\n]+/).every(line => !line.trim() || line.trim().startsWith('//'));
 
-				if(!isPureCommentBlock){
+				if (!isPureCommentBlock) {
 					scripts.push(match);
 				}
 
 				return inlineScriptReplaceSymbol;
 			}
-		})
+		});
 
 	scripts = scripts.filter(function (script) {
 		// filter empty script

@@ -15,7 +15,6 @@ test('test process-tpl', () => {
 		'</script>\n' +
 		'<script>\n' +
 		'\n' +
-		'// bigfish version: 2.7.2\n' +
 		'// umi version: 2.2.8\n' +
 		'// build time: Wed Dec 26 2018 17:54:47 GMT+0800 (CST)\n' +
 		'\n' +
