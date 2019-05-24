@@ -10,6 +10,7 @@ import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
+const fetch = window.fetch.bind(window);
 
 function getDomain(url) {
 	try {
