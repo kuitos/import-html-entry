@@ -13,6 +13,8 @@ const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
+const STYLE_IGNORE_REGEX = /.*\ignore\s*.*/
+const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i
 
 function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
@@ -25,7 +27,7 @@ function getBaseDomain(url) {
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
-
+export const ignoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 /**
  * parse the script link from the template
  * TODO
@@ -59,6 +61,8 @@ export default function processTpl(tpl, domain) {
 			if (styleType) {
 
 				const styleHref = match.match(STYLE_HREF_REGEX);
+				const styleIgnore = match.match(STYLE_IGNORE_REGEX);
+
 				if (styleHref) {
 
 					const href = styleHref && styleHref[2];
@@ -68,7 +72,9 @@ export default function processTpl(tpl, domain) {
 						// 处理一下使用相对路径的场景
 						newHref = getBaseDomain(domain) + (href.startsWith('/') ? href : `/${href}`);
 					}
-
+					if (styleIgnore) {
+						return ignoreAssetReplaceSymbol(newHref)
+					}
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
 				}
@@ -77,7 +83,10 @@ export default function processTpl(tpl, domain) {
 			return match;
 		})
 		.replace(ALL_SCRIPT_REGEX, match => {
-
+			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
+			if (scriptIgnore) {
+				return ignoreAssetReplaceSymbol()
+			}
 			// in order to keep the exec order of all javascripts
 
 			// if it is a external script
