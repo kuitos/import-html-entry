@@ -1,4 +1,4 @@
-import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from '../process-tpl';
+import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol, ignoreAssetReplaceSymbol } from '../process-tpl';
 
 test('test process-tpl', () => {
 
@@ -58,3 +58,38 @@ test('test process-tpl', () => {
 	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
 
 });
+
+test('test ignore js or css', () => {
+	const tpl = '<!DOCTYPE html><html><head>\n' +
+		'\n' +
+		'<link rel="shortcut icon" href="https://t.alipayobjects.com/images/rmsweb/T1pqpiXfJgXXXXXXXX.png" type="image/x-icon">\n' +
+		'<link ignore rel="stylesheet" href="/umi.css">\n' +
+		'\n' +
+		'<meta charset="utf-8">\n' +
+		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
+		'<title>&#x91D1;&#x878D;&#x4E91;&#x63A7;&#x5236;&#x53F0;</title>\n' +
+		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
+		'</head>\n' +
+		'<body>\n' +
+		'\n' +
+		'<div id="root"></div>\n' +
+		'\n' +
+		'<script ignore src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>\n' +
+		'<script src="/app.js"></script>\n' +
+		'<script ignore>alert(1)</script>\n' +
+		'<script ignore src="/polyfill.js"></script>\n' +
+		'\n' +
+		'\n' +
+		'</body></html>';
+
+		const { entry, template } = processTpl(tpl, 'http://kuitos.me');
+
+		expect(entry).toBe('http://kuitos.me/app.js');
+
+		expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) === -1).toBeTruthy();
+		expect(template.indexOf(ignoreAssetReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
+
+		expect(template.indexOf(genScriptReplaceSymbol('//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js')) === -1).toBeTruthy();
+		expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/polyfill.js')) === -1).toBeTruthy();
+		expect(template.indexOf(ignoreAssetReplaceSymbol()) !== -1).toBeTruthy();
+})
