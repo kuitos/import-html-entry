@@ -10,9 +10,13 @@ const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
+const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
+const STYLE_TAG_REGEX = /<style[^>]*>[\s\S]*?<\/style>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
+const STYLE_IGNORE_REGEX = /<style(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
+const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
 
 function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
@@ -25,7 +29,7 @@ function getBaseDomain(url) {
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
-
+export const ignoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 /**
  * parse the script link from the template
  * TODO
@@ -59,6 +63,8 @@ export default function processTpl(tpl, domain) {
 			if (styleType) {
 
 				const styleHref = match.match(STYLE_HREF_REGEX);
+				const styleIgnore = match.match(LINK_IGNORE_REGEX);
+
 				if (styleHref) {
 
 					const href = styleHref && styleHref[2];
@@ -68,7 +74,10 @@ export default function processTpl(tpl, domain) {
 						// 处理一下使用相对路径的场景
 						newHref = getBaseDomain(domain) + (href.startsWith('/') ? href : `/${href}`);
 					}
-
+					if (styleIgnore) {
+						return ignoreAssetReplaceSymbol(newHref)
+					}
+					
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
 				}
@@ -76,8 +85,14 @@ export default function processTpl(tpl, domain) {
 
 			return match;
 		})
+		.replace(STYLE_TAG_REGEX, match => {
+			if (STYLE_IGNORE_REGEX.test(match)) {
+				return ignoreAssetReplaceSymbol('style file');
+			}
+			return match;
+		})
 		.replace(ALL_SCRIPT_REGEX, match => {
-
+			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
 			// in order to keep the exec order of all javascripts
 
 			// if it is a external script
@@ -102,6 +117,10 @@ export default function processTpl(tpl, domain) {
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
 				}
 
+				if (scriptIgnore) {
+					return ignoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
+				}
+
 				if (matchedScriptSrc) {
 					scripts.push(matchedScriptSrc);
 					return genScriptReplaceSymbol(matchedScriptSrc);
@@ -109,6 +128,9 @@ export default function processTpl(tpl, domain) {
 
 				return match;
 			} else {
+				if (scriptIgnore) {
+					return ignoreAssetReplaceSymbol('js file');
+				}
 				// if it is an inline script
 				const code = getInlineCode(match);
 
