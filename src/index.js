@@ -14,9 +14,16 @@ const fetch = window.fetch.bind(window);
 
 function getDomain(url) {
 	try {
+		// case url = "https://a.bbb.com/cc/dd/ee/1.0.2/index.html
 		// URL 构造函数不支持使用 // 前缀的 url
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
-		return href.origin;
+		const url = href.origin + href.pathname;
+		let domain;
+		if (url.endsWith('html') || url.endsWith('htm')) {
+			const index = url.lastIndexOf('/');
+			domain = url.substring(0, index + 1);
+		}
+		return domain || href.origin;
 	} catch (e) {
 		return '';
 	}
