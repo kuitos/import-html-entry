@@ -68,6 +68,12 @@ test('test ignore js or css', () => {
 		'<meta charset="utf-8">\n' +
 		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
 		'<title>&#x91D1;&#x878D;&#x4E91;&#x63A7;&#x5236;&#x53F0;</title>\n' +
+		'<style ignore>body {color: red}</style>\n' +
+		'<style ignore>\n' +
+		'	body {\n' +
+		'		color: red\n'+
+		'	}\n' +
+		'</style>\n' +
 		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
 		'</head>\n' +
 		'<body>\n' +
@@ -83,13 +89,15 @@ test('test ignore js or css', () => {
 		'</body></html>';
 
 		const { entry, template } = processTpl(tpl, 'http://kuitos.me');
-
 		expect(entry).toBe('http://kuitos.me/app.js');
+
+		expect(template.indexOf(ignoreAssetReplaceSymbol('style file')) !== -1).toBeTruthy()
 
 		expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) === -1).toBeTruthy();
 		expect(template.indexOf(ignoreAssetReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 		expect(template.indexOf(genScriptReplaceSymbol('//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js')) === -1).toBeTruthy();
 		expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/polyfill.js')) === -1).toBeTruthy();
-		expect(template.indexOf(ignoreAssetReplaceSymbol()) !== -1).toBeTruthy();
+		expect(template.indexOf(ignoreAssetReplaceSymbol('http://kuitos.me/polyfill.js')) !== -1).toBeTruthy();
+		expect(template.indexOf(ignoreAssetReplaceSymbol('js file')) !== -1).toBeTruthy();
 })
