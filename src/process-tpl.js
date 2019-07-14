@@ -29,7 +29,7 @@ function getBaseDomain(url) {
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
-export const ignoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
+export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 /**
  * parse the script link from the template
  * TODO
@@ -75,9 +75,9 @@ export default function processTpl(tpl, domain) {
 						newHref = getBaseDomain(domain) + (href.startsWith('/') ? href : `/${href}`);
 					}
 					if (styleIgnore) {
-						return ignoreAssetReplaceSymbol(newHref)
+						return genIgnoreAssetReplaceSymbol(newHref);
 					}
-					
+
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
 				}
@@ -87,7 +87,7 @@ export default function processTpl(tpl, domain) {
 		})
 		.replace(STYLE_TAG_REGEX, match => {
 			if (STYLE_IGNORE_REGEX.test(match)) {
-				return ignoreAssetReplaceSymbol('style file');
+				return genIgnoreAssetReplaceSymbol('style file');
 			}
 			return match;
 		})
@@ -118,7 +118,7 @@ export default function processTpl(tpl, domain) {
 				}
 
 				if (scriptIgnore) {
-					return ignoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
+					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
 				}
 
 				if (matchedScriptSrc) {
@@ -129,7 +129,7 @@ export default function processTpl(tpl, domain) {
 				return match;
 			} else {
 				if (scriptIgnore) {
-					return ignoreAssetReplaceSymbol('js file');
+					return genIgnoreAssetReplaceSymbol('js file');
 				}
 				// if it is an inline script
 				const code = getInlineCode(match);

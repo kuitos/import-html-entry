@@ -1,4 +1,4 @@
-import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol, ignoreAssetReplaceSymbol } from '../process-tpl';
+import processTpl, { genIgnoreAssetReplaceSymbol, genLinkReplaceSymbol, genScriptReplaceSymbol } from '../process-tpl';
 
 test('test process-tpl', () => {
 
@@ -45,10 +45,10 @@ test('test process-tpl', () => {
 
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
 	expect(entry).toBe('http://kuitos.me/comment.js');
-	expect(scripts).toEqual([ '<script>\n  window.routerBase = "/";\n</script>',
-	'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
-	'http://kuitos.me/umi.js',
-	'http://kuitos.me/comment.js' ]);
+	expect(scripts).toEqual(['<script>\n  window.routerBase = "/";\n</script>',
+		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
+		'http://kuitos.me/umi.js',
+		'http://kuitos.me/comment.js']);
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
@@ -71,7 +71,7 @@ test('test ignore js or css', () => {
 		'<style ignore>body {color: red}</style>\n' +
 		'<style ignore>\n' +
 		'	body {\n' +
-		'		color: red\n'+
+		'		color: red\n' +
 		'	}\n' +
 		'</style>\n' +
 		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
@@ -88,16 +88,16 @@ test('test ignore js or css', () => {
 		'\n' +
 		'</body></html>';
 
-		const { entry, template } = processTpl(tpl, 'http://kuitos.me');
-		expect(entry).toBe('http://kuitos.me/app.js');
+	const { entry, template } = processTpl(tpl, 'http://kuitos.me');
+	expect(entry).toBe('http://kuitos.me/app.js');
 
-		expect(template.indexOf(ignoreAssetReplaceSymbol('style file')) !== -1).toBeTruthy()
+	expect(template.indexOf(genIgnoreAssetReplaceSymbol('style file')) !== -1).toBeTruthy();
 
-		expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) === -1).toBeTruthy();
-		expect(template.indexOf(ignoreAssetReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) === -1).toBeTruthy();
+	expect(template.indexOf(genIgnoreAssetReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
-		expect(template.indexOf(genScriptReplaceSymbol('//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js')) === -1).toBeTruthy();
-		expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/polyfill.js')) === -1).toBeTruthy();
-		expect(template.indexOf(ignoreAssetReplaceSymbol('http://kuitos.me/polyfill.js')) !== -1).toBeTruthy();
-		expect(template.indexOf(ignoreAssetReplaceSymbol('js file')) !== -1).toBeTruthy();
-})
+	expect(template.indexOf(genScriptReplaceSymbol('//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js')) === -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/polyfill.js')) === -1).toBeTruthy();
+	expect(template.indexOf(genIgnoreAssetReplaceSymbol('http://kuitos.me/polyfill.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genIgnoreAssetReplaceSymbol('js file')) !== -1).toBeTruthy();
+});
