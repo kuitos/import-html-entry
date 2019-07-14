@@ -32,11 +32,10 @@ export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 /**
  * parse the script link from the template
- * TODO
- *    1. collect stylesheets
- *    2. use global eval to evaluate the inline scripts
- *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
- *        see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
+ * 1. collect stylesheets
+ * 2. use global eval to evaluate the inline scripts
+ *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
+ *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
  * @param domain
  * @stripStyles whether to strip the css links
