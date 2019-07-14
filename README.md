@@ -26,7 +26,7 @@ importHTML('./subApp/index.html')
     .then(res => {
         console.log(res.template);
 
-        res.execScript().then(exports => {
+        res.execScripts().then(exports => {
             const mobx = exports;
             const { observable } = mobx;
             observable({
