@@ -27,3 +27,5 @@ example/bundle.js.map
 lib/
 esm/
 node_modules/
+dist
+yarn.lock

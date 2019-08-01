@@ -94,7 +94,8 @@ function execScripts(entry, scripts, proxy = window) {
 					noteGlobalProps();
 
 					try {
-						geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+						// bind window.proxy to change `this` reference in script
+						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
 					} catch (e) {
 						console.error(`error occurs while executing the entry ${scriptSrc}`);
 						console.error(e);
@@ -105,7 +106,8 @@ function execScripts(entry, scripts, proxy = window) {
 
 				} else {
 					try {
-						geval(`;(function(window){;${inlineScript}\n})(window.proxy);`);
+						// bind window.proxy to change `this` reference in script
+						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
 					} catch (e) {
 						console.error(`error occurs while executing ${scriptSrc}`);
 						console.error(e);

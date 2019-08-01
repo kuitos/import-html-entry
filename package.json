@@ -19,6 +19,7 @@
     "build:dist": "rm -fr ./lib && webpack --env.minimize --display normal && webpack --display normal",
     "build:esm": "rm -fr ./esm && babel ./src --out-dir ./esm --ignore 'src/**/__tests__/**/*.js'",
     "prepush": "npm run lint",
+    "release": "np --no-cleanup --yolo --no-publish",
     "test": "jest --no-cache"
   },
   "repository": {
@@ -51,6 +52,7 @@
     "babel-loader": "^8.0.2",
     "husky": "^1.3.1",
     "jest": "^23.6.0",
+    "np": "^5.0.3",
     "regenerator-runtime": "^0.13.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
