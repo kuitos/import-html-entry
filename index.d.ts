@@ -3,16 +3,10 @@
  * @since 2019-05-16
  */
 
-type LifeCycles = {
-	bootstrap: () => Promise<any>;
-	mount: () => Promise<any>;
-	unmount: () => Promise<any>;
-};
-
 interface IImportResult {
 	template: string;
 
-	execScripts(sandbox?: object): Promise<LifeCycles>;
+	execScripts<T>(sandbox?: object): Promise<T>;
 
 	getExternalScripts(): Promise<string[]>;
 
