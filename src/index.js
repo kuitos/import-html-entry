@@ -98,7 +98,7 @@ function execScripts(entry, scripts, proxy = window) {
 						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
 					} catch (e) {
 						console.error(`error occurs while executing the entry ${scriptSrc}`);
-						console.error(e);
+						throw e;
 					}
 
 					const exports = proxy[getGlobalProp()] || {};
@@ -110,7 +110,7 @@ function execScripts(entry, scripts, proxy = window) {
 						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
 					} catch (e) {
 						console.error(`error occurs while executing ${scriptSrc}`);
-						console.error(e);
+						throw e;
 					}
 
 				}
