@@ -20,6 +20,10 @@ test('test process-tpl', () => {
 		'\n' +
 		'</script>\n' +
 		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
+		'<script \n' +
+		'  src="https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js"\n' +
+		'  crossorigin="anonymous"' +
+		'></script>' +
 		'<style>\n' +
 		'body {\n' +
 		'background-color: red;\n' +
@@ -47,6 +51,7 @@ test('test process-tpl', () => {
 	expect(entry).toBe('http://kuitos.me/comment.js');
 	expect(scripts).toEqual(['<script>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
+		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
 		'http://kuitos.me/umi.js',
 		'http://kuitos.me/comment.js']);
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
@@ -74,6 +79,10 @@ test('test ignore js or css', () => {
 		'		color: red\n' +
 		'	}\n' +
 		'</style>\n' +
+		'<script' +
+		'  src="https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js"\n' +
+		'  crossorigin="anonymous"' +
+		'></script>' +
 		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
 		'</head>\n' +
 		'<body>\n' +
