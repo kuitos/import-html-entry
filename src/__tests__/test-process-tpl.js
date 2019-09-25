@@ -13,6 +13,10 @@ test('test process-tpl', () => {
 		'<script data-test>\n' +
 		'  window.routerBase = "/";\n' +
 		'</script>\n' +
+		'<script \n ' +
+		'data-test>\n' +
+		'  window.routerBase = "/";\n' +
+		'</script>\n' +
 		'<script>\n' +
 		'\n' +
 		'// umi version: 2.2.8\n' +
@@ -50,6 +54,7 @@ test('test process-tpl', () => {
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
 	expect(entry).toBe('http://kuitos.me/comment.js');
 	expect(scripts).toEqual(['<script data-test>\n  window.routerBase = "/";\n</script>',
+		'<script \n data-test>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
 		'http://kuitos.me/umi.js',
