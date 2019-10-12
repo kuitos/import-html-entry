@@ -7,13 +7,13 @@ import { getInlineCode } from './utils';
 
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
-const SCRIPT_SRC_REGEX = /.*\ssrc=('|")(\S+)\1.*/;
+const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
 const STYLE_TAG_REGEX = /<style[^>]*>[\s\S]*?<\/style>/gi;
-const STYLE_TYPE_REGEX = /\s+rel=("|')stylesheet\1.*/;
-const STYLE_HREF_REGEX = /.*\shref=('|")(\S+)\1.*/;
+const STYLE_TYPE_REGEX = /\s+rel=('|")?stylesheet\1.*/;
+const STYLE_HREF_REGEX = /.*\shref=('|")?([^>'"\s]+)/;
 const STYLE_IGNORE_REGEX = /<style(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
 const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g;
 const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
