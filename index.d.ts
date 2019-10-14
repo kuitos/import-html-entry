@@ -13,8 +13,12 @@ interface IImportResult {
 	getExternalStyleSheets(): Promise<string[]>;
 }
 
+type ImportEntryOpts = {
+	fetch?: Function;
+}
+
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
-export default function importHTML(url: string): Promise<IImportResult>;
+export default function importHTML(url: string, fetch?: Function): Promise<IImportResult>;
 
-export function importEntry(entry: Entry): Promise<IImportResult>;
+export function importEntry(entry: Entry, opts?: ImportEntryOpts): Promise<IImportResult>;
