@@ -28,8 +28,8 @@ function getDomain(url) {
  * @param styles
  * @return embedHTML
  */
-function getEmbedHTML(template, styles, fetch = defaultFetch) {
-
+function getEmbedHTML(template, styles, opts = {}) {
+	const { fetch = defaultFetch } = opts
 	let embedHTML = template;
 
 	return getExternalStyleSheets(styles, fetch)
@@ -146,7 +146,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 
 			const { template, scripts, entry, styles } = processTpl(html, getDomain(url));
 
-			return getEmbedHTML(template, styles, fetch).then(embedHTML => ({
+			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
@@ -172,7 +172,7 @@ export function importEntry(entry, opts = {}) {
 
 		const { scripts = [], styles = [], html = '' } = entry;
 
-		return getEmbedHTML(html, styles, fetch).then(embedHTML => ({
+		return getEmbedHTML(html, styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
