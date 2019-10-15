@@ -10,7 +10,7 @@ import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
-const defaultFetch = window.fetch.bind(window);
+const defaultFetch = window.fetch && window.fetch.bind(window);
 
 function getDomain(url) {
 	try {
@@ -43,7 +43,7 @@ function getEmbedHTML(template, styles, opts = {}) {
 }
 
 // for prefetch
-function getExternalStyleSheets(styles, fetch = defaultFetch) {
+export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
 			if (styleLink.startsWith('<')) {
 				// if it is inline style
@@ -59,7 +59,7 @@ function getExternalStyleSheets(styles, fetch = defaultFetch) {
 }
 
 // for prefetch
-function getExternalScripts(scripts, fetch = defaultFetch) {
+export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
 			if (script.startsWith('<')) {
 				// if it is inline script
