@@ -59,7 +59,8 @@
   },
   "jest": {
     "globals": {
-      "process.env.NODE_ENV": "test"
+      "process.env.NODE_ENV": "test",
+      "window": "{}"
     },
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.js"

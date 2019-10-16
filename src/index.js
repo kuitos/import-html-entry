@@ -10,8 +10,7 @@ import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
-const fetch = window.fetch.bind(window);
-
+const defaultFetch = window.fetch && window.fetch.bind(window) || function () { return new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways') };
 function getDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
@@ -28,11 +27,11 @@ function getDomain(url) {
  * @param styles
  * @return embedHTML
  */
-function getEmbedHTML(template, styles) {
-
+function getEmbedHTML(template, styles, opts = {}) {
+	const { fetch = defaultFetch } = opts
 	let embedHTML = template;
 
-	return getExternalStyleSheets(styles)
+	return getExternalStyleSheets(styles, fetch)
 		.then(styleSheets => {
 			embedHTML = styles.reduce((html, styleSrc, i) => {
 				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
@@ -43,7 +42,7 @@ function getEmbedHTML(template, styles) {
 }
 
 // for prefetch
-function getExternalStyleSheets(styles) {
+export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
 			if (styleLink.startsWith('<')) {
 				// if it is inline style
@@ -59,7 +58,7 @@ function getExternalStyleSheets(styles) {
 }
 
 // for prefetch
-function getExternalScripts(scripts) {
+export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
 			if (script.startsWith('<')) {
 				// if it is inline script
@@ -73,9 +72,10 @@ function getExternalScripts(scripts) {
 	));
 }
 
-function execScripts(entry, scripts, proxy = window) {
+function execScripts(entry, scripts, proxy = window, opts = {}) {
+	const { fetch = defaultFetch } = opts
 
-	return getExternalScripts(scripts)
+	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
 
 			window.proxy = proxy;
@@ -137,7 +137,7 @@ function execScripts(entry, scripts, proxy = window) {
 		});
 }
 
-export default function importHTML(url) {
+export default function importHTML(url, fetch = defaultFetch) {
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
@@ -145,16 +145,17 @@ export default function importHTML(url) {
 
 			const { template, scripts, entry, styles } = processTpl(html, getDomain(url));
 
-			return getEmbedHTML(template, styles).then(embedHTML => ({
+			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
-				getExternalScripts: () => getExternalScripts(scripts),
-				getExternalStyleSheets: () => getExternalStyleSheets(styles),
-				execScripts: proxy => execScripts(entry, scripts, proxy),
+				getExternalScripts: () => getExternalScripts(scripts, fetch),
+				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
+				execScripts: proxy => execScripts(entry, scripts, proxy, { fetch }),
 			}));
 		}));
 };
 
-export function importEntry(entry) {
+export function importEntry(entry, opts = {}) {
+	const { fetch = defaultFetch } = opts
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -162,7 +163,7 @@ export function importEntry(entry) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry);
+		return importHTML(entry, fetch);
 	}
 
 	// config entry
@@ -170,11 +171,11 @@ export function importEntry(entry) {
 
 		const { scripts = [], styles = [], html = '' } = entry;
 
-		return getEmbedHTML(html, styles).then(embedHTML => ({
+		return getEmbedHTML(html, styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
-			getExternalScripts: () => getExternalScripts(scripts),
-			getExternalStyleSheets: () => getExternalStyleSheets(styles),
-			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy),
+			getExternalScripts: () => getExternalScripts(scripts, fetch),
+			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
+			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch }),
 		}));
 
 	} else {
