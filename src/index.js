@@ -10,8 +10,7 @@ import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
-const defaultFetch = window.fetch && window.fetch.bind(window);
-
+const defaultFetch = window.fetch && window.fetch.bind(window) || function () { return new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways') };
 function getDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
