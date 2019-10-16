@@ -10,7 +10,11 @@ import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
-const defaultFetch = window.fetch && window.fetch.bind(window) || function () { return new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways') };
+if (!window.fetch) {
+	throw new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways');
+}
+const defaultFetch = window.fetch.bind(window);
+
 function getDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
@@ -25,10 +29,11 @@ function getDomain(url) {
  * convert external css link to inline style for performance optimization
  * @param template
  * @param styles
+ * @param opts
  * @return embedHTML
  */
 function getEmbedHTML(template, styles, opts = {}) {
-	const { fetch = defaultFetch } = opts
+	const { fetch = defaultFetch } = opts;
 	let embedHTML = template;
 
 	return getExternalStyleSheets(styles, fetch)
@@ -73,7 +78,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 }
 
 function execScripts(entry, scripts, proxy = window, opts = {}) {
-	const { fetch = defaultFetch } = opts
+	const { fetch = defaultFetch } = opts;
 
 	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
@@ -155,7 +160,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch } = opts
+	const { fetch = defaultFetch } = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
