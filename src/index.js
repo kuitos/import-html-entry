@@ -49,31 +49,31 @@ function getEmbedHTML(template, styles, opts = {}) {
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
-			if (styleLink.startsWith('<')) {
-				// if it is inline style
-				return getInlineCode(styleLink);
-			} else {
-				// external styles
-				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
-			}
+		if (styleLink.startsWith('<')) {
+			// if it is inline style
+			return getInlineCode(styleLink);
+		} else {
+			// external styles
+			return styleCache[styleLink] ||
+				(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+		}
 
-		},
+	},
 	));
 }
 
 // for prefetch
 export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
-			if (script.startsWith('<')) {
-				// if it is inline script
-				return getInlineCode(script);
-			} else {
-				// external script
-				return scriptCache[script] ||
-					(scriptCache[script] = fetch(script).then(response => response.text()));
-			}
-		},
+		if (script.startsWith('<')) {
+			// if it is inline script
+			return getInlineCode(script);
+		} else {
+			// external script
+			return scriptCache[script] ||
+				(scriptCache[script] = fetch(script).then(response => response.text()));
+		}
+	},
 	));
 }
 
@@ -106,7 +106,12 @@ function execScripts(entry, scripts, proxy = window, opts = {}) {
 						throw e;
 					}
 
-					const exports = proxy[getGlobalProp()] || {};
+					// get custom 'app_entry_name' if user have assigned.
+					const __app_entry_name__ = proxy.__app_entry_name__;
+					if (__app_entry_name__ === undefined || __app_entry_name__ === null || __app_entry_name__ === '') {
+						__app_entry_name__ = getGlobalProp();
+					}
+					const exports = proxy[__app_entry_name__] || {};
 					resolve(exports);
 
 				} else {
