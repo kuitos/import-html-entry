@@ -6,6 +6,8 @@
 interface IImportResult {
 	template: string;
 
+	assetPublicPath: string;
+
 	execScripts<T>(sandbox?: object): Promise<T>;
 
 	getExternalScripts(): Promise<string[]>;
