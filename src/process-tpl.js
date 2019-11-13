@@ -22,10 +22,6 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
 
-function getBaseDomain(url) {
-	return url.endsWith('/') ? url.substr(0, url.length - 1) : url;
-}
-
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
@@ -71,7 +67,7 @@ export default function processTpl(tpl, domain) {
 
 					if (href && !hasProtocol(href)) {
 						// 处理一下使用相对路径的场景
-						newHref = getBaseDomain(domain) + (href.startsWith('/') ? href : `/${href}`);
+						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
 					}
 					if (styleIgnore) {
 						return genIgnoreAssetReplaceSymbol(newHref);
@@ -110,7 +106,7 @@ export default function processTpl(tpl, domain) {
 
 					// append the domain while the script not have an protocol prefix
 					if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-						matchedScriptSrc = getBaseDomain(domain) + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
+						matchedScriptSrc = domain + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
 					}
 
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
