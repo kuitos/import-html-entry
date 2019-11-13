@@ -148,7 +148,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 		.then(response => response.text())
 		.then(html => {
 
-			const assetPublicPath = getDomain(url);
+			const assetPublicPath = getDomain(url) + '/';
 			const { template, scripts, entry, styles } = processTpl(html, assetPublicPath);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
