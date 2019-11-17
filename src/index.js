@@ -15,7 +15,7 @@ if (!window.fetch) {
 }
 const defaultFetch = window.fetch.bind(window);
 
-function getDomain(url) {
+function defaultGetDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
@@ -49,31 +49,31 @@ function getEmbedHTML(template, styles, opts = {}) {
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
-			if (styleLink.startsWith('<')) {
-				// if it is inline style
-				return getInlineCode(styleLink);
-			} else {
-				// external styles
-				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
-			}
+		if (styleLink.startsWith('<')) {
+			// if it is inline style
+			return getInlineCode(styleLink);
+		} else {
+			// external styles
+			return styleCache[styleLink] ||
+				(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+		}
 
-		},
+	},
 	));
 }
 
 // for prefetch
 export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
-			if (script.startsWith('<')) {
-				// if it is inline script
-				return getInlineCode(script);
-			} else {
-				// external script
-				return scriptCache[script] ||
-					(scriptCache[script] = fetch(script).then(response => response.text()));
-			}
-		},
+		if (script.startsWith('<')) {
+			// if it is inline script
+			return getInlineCode(script);
+		} else {
+			// external script
+			return scriptCache[script] ||
+				(scriptCache[script] = fetch(script).then(response => response.text()));
+		}
+	},
 	));
 }
 
@@ -142,8 +142,8 @@ function execScripts(entry, scripts, proxy = window, opts = {}) {
 		});
 }
 
-export default function importHTML(url, fetch = defaultFetch) {
-
+export default function importHTML(url, opts = {}) {
+	const { fetch = defaultFetch, getDomain = defaultGetDomain } = opts;
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
@@ -163,7 +163,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain } = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -171,7 +171,7 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, fetch);
+		return importHTML(entry, { fetch, getDomain });
 	}
 
 	// config entry
