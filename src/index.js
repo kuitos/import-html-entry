@@ -143,14 +143,14 @@ function execScripts(entry, scripts, proxy = window, opts = {}) {
 }
 
 export default function importHTML(url, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, customTemplateRules } = opts;
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
 
 			const domain = getDomain(url);
 			const assetPublicPath = `${domain}/`;
-			const { template, scripts, entry, styles } = processTpl(html, domain);
+			const { template, scripts, entry, styles } = processTpl(html, domain, customTemplateRules);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
@@ -163,7 +163,7 @@ export default function importHTML(url, opts = {}) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, customTemplateRules } = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -171,7 +171,7 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, { fetch, getDomain });
+		return importHTML(entry, { fetch, getDomain, customTemplateRules });
 	}
 
 	// config entry

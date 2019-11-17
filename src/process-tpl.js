@@ -21,6 +21,9 @@ const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
 function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
+function defaultTemplateRules(tpl) {
+	return tpl
+}
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
@@ -34,122 +37,123 @@ export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'f
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
  * @param domain
+ * @param customTemplateRules
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain) {
+export default function processTpl(tpl, domain, customTemplateRules) {
 
-	let scripts = [];
-	const styles = [];
-	let entry = null;
+    let scripts = [];
+    const styles = [];
+    let entry = null;
+	const templateRules = customTemplateRules || defaultTemplateRules;
+	const template =
+        templateRules(tpl)
+        /*
+        remove html comment first
+        */
+            .replace(HTML_COMMENT_REGEX, '')
 
-	const template = tpl
-
-		/*
-		remove html comment first
-		*/
-		.replace(HTML_COMMENT_REGEX, '')
-
-		.replace(LINK_TAG_REGEX, match => {
-			/*
-			change the css link
-			*/
+            .replace(LINK_TAG_REGEX, match => {
+                /*
+                change the css link
+                */
 			const styleType = !!match.match(STYLE_TYPE_REGEX);
-			if (styleType) {
+                if (styleType) {
 
 				const styleHref = match.match(STYLE_HREF_REGEX);
 				const styleIgnore = match.match(LINK_IGNORE_REGEX);
 
-				if (styleHref) {
+                    if (styleHref) {
 
 					const href = styleHref && styleHref[2];
 					let newHref = href;
 
-					if (href && !hasProtocol(href)) {
-						// 处理一下使用相对路径的场景
+                        if (href && !hasProtocol(href)) {
+                            // 处理一下使用相对路径的场景
 						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
-					}
-					if (styleIgnore) {
+                        }
+                        if (styleIgnore) {
 						return genIgnoreAssetReplaceSymbol(newHref);
-					}
+                        }
 
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
-				}
-			}
+                    }
+                }
 
 			return match;
-		})
-		.replace(STYLE_TAG_REGEX, match => {
-			if (STYLE_IGNORE_REGEX.test(match)) {
+            })
+            .replace(STYLE_TAG_REGEX, match => {
+                if (STYLE_IGNORE_REGEX.test(match)) {
 				return genIgnoreAssetReplaceSymbol('style file');
-			}
+                }
 			return match;
-		})
-		.replace(ALL_SCRIPT_REGEX, match => {
+            })
+            .replace(ALL_SCRIPT_REGEX, match => {
 			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
-			// in order to keep the exec order of all javascripts
+                // in order to keep the exec order of all javascripts
 
-			// if it is a external script
-			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
-				/*
-				collect scripts and replace the ref
-				*/
+                // if it is a external script
+                if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
+                    /*
+                    collect scripts and replace the ref
+                    */
 
 				const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
 				const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
 				let matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
 
-				if (entry && matchedScriptEntry) {
+                    if (entry && matchedScriptEntry) {
 					throw new SyntaxError('You should not set multiply entry script!');
-				} else {
+                    } else {
 
-					// append the domain while the script not have an protocol prefix
-					if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
+                        // append the domain while the script not have an protocol prefix
+                        if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
 						matchedScriptSrc = domain + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
-					}
+                        }
 
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
-				}
+                    }
 
-				if (scriptIgnore) {
+                    if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
-				}
+                    }
 
-				if (matchedScriptSrc) {
+                    if (matchedScriptSrc) {
 					scripts.push(matchedScriptSrc);
 					return genScriptReplaceSymbol(matchedScriptSrc);
-				}
+                    }
 
 				return match;
-			} else {
-				if (scriptIgnore) {
+                } else {
+                    if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol('js file');
-				}
-				// if it is an inline script
+                    }
+                    // if it is an inline script
 				const code = getInlineCode(match);
 
-				// remove script blocks when all of these lines are comments.
+                    // remove script blocks when all of these lines are comments.
 				const isPureCommentBlock = code.split(/[\r\n]+/).every(line => !line.trim() || line.trim().startsWith('//'));
 
-				if (!isPureCommentBlock) {
+                    if (!isPureCommentBlock) {
 					scripts.push(match);
-				}
+                    }
 
 				return inlineScriptReplaceSymbol;
-			}
+                }
 		});
 
-	scripts = scripts.filter(function (script) {
-		// filter empty script
+    scripts = scripts.filter(function (script) {
+        // filter empty script
 		return !!script;
 	});
 
-	return {
-		template,
-		scripts,
-		styles,
-		// set the last script as entry if have not set
-		entry: entry || scripts[scripts.length - 1],
+    return {
+        template,
+        scripts,
+        styles,
+        // set the last script as entry if have not set
+        entry: entry || scripts[scripts.length - 1],
 	};
 }
