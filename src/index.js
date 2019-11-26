@@ -4,8 +4,14 @@
  * @since 2018-08-15 11:37
  */
 
-import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
+import processTpl, {
+	genLinkReplaceSymbol
+} from './process-tpl';
+import {
+	getGlobalProp,
+	getInlineCode,
+	noteGlobalProps
+} from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -33,7 +39,9 @@ function getDomain(url) {
  * @return embedHTML
  */
 function getEmbedHTML(template, styles, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const {
+		fetch = defaultFetch
+	} = opts;
 	let embedHTML = template;
 
 	return getExternalStyleSheets(styles, fetch)
@@ -49,36 +57,36 @@ function getEmbedHTML(template, styles, opts = {}) {
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
-			if (styleLink.startsWith('<')) {
-				// if it is inline style
-				return getInlineCode(styleLink);
-			} else {
-				// external styles
-				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
-			}
+		if (styleLink.startsWith('<')) {
+			// if it is inline style
+			return getInlineCode(styleLink);
+		} else {
+			// external styles
+			return styleCache[styleLink] ||
+				(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+		}
 
-		},
-	));
+	}, ));
 }
 
 // for prefetch
 export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
-			if (script.startsWith('<')) {
-				// if it is inline script
-				return getInlineCode(script);
-			} else {
-				// external script
-				return scriptCache[script] ||
-					(scriptCache[script] = fetch(script).then(response => response.text()));
-			}
-		},
-	));
+		if (script.startsWith('<')) {
+			// if it is inline script
+			return getInlineCode(script);
+		} else {
+			// external script
+			return scriptCache[script] ||
+				(scriptCache[script] = fetch(script).then(response => response.text()));
+		}
+	}, ));
 }
 
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const {
+		fetch = defaultFetch
+	} = opts;
 
 	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
@@ -146,24 +154,59 @@ export default function importHTML(url, fetch = defaultFetch) {
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
-		.then(html => {
+		.then(async html => {
 
 			const domain = getDomain(url);
 			const assetPublicPath = `${domain}/`;
-			const { template, scripts, entry, styles } = processTpl(html, domain);
-
-			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
+			let modules = html.match(/\<meta name="autoModules" content=\'(\S*)?\'\>/);
+			let m = JSON.parse(modules ? modules[1] : '[]')
+			if (m.length >= 1) {
+				let scriptsString = ''
+				m[1].forEach((item) => {
+					scriptsString += '<script src="' + item + '"></script>'
+				})
+				html = html.replace(/<\/body>/, scriptsString + '</body>')
+			}
+			const {
+				template,
+				scripts,
+				entry,
+				styles
+			} = processTpl(html, domain);
+			if (m.length >= 1) {
+				let SystemJS = window.SystemJS
+				let p = []
+				if (m.length !== 0) {
+					m[0].forEach((item) => {
+						const pi = SystemJS.import(item)
+						p.push(pi)
+					})
+					await Promise.all(p).then((list) => {
+						list.forEach((item, i) => {
+							window[m[0][i]] = item
+						})
+						console.log('import finish')
+					})
+				}
+			}
+			return getEmbedHTML(template, styles, {
+				fetch
+			}).then(embedHTML => ({
 				template: embedHTML,
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: proxy => execScripts(entry, scripts, proxy, { fetch }),
+				execScripts: proxy => execScripts(entry, scripts, proxy, {
+					fetch
+				}),
 			}));
 		}));
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const {
+		fetch = defaultFetch
+	} = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -177,14 +220,20 @@ export function importEntry(entry, opts = {}) {
 	// config entry
 	if (Array.isArray(entry.scripts) || Array.isArray(entry.styles)) {
 
-		const { scripts = [], styles = [], html = '' } = entry;
+		const {
+			scripts = [], styles = [], html = ''
+		} = entry;
 
-		return getEmbedHTML(html, styles, { fetch }).then(embedHTML => ({
+		return getEmbedHTML(html, styles, {
+			fetch
+		}).then(embedHTML => ({
 			template: embedHTML,
 			assetPublicPath: '/',
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch }),
+			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy, {
+				fetch
+			}),
 		}));
 
 	} else {
