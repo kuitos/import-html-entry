@@ -1,6 +1,6 @@
 {
-  "name": "import-html-entry",
-  "version": "1.3.5",
+  "name": "import-html-entry-externals",
+  "version": "0.9.0",
   "description": "import html and get the exports of entry",
   "main": "./lib/index.js",
   "module": "./esm/index.js",
@@ -31,12 +31,12 @@
     "html",
     "importer"
   ],
-  "author": "Kuitos",
+  "author": "mayako",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kuitos/import-html-entry/issues"
   },
-  "homepage": "https://github.com/kuitos/import-html-entry#readme",
+  "homepage": "https://github.com/mayako21126/import-html-entry#readme",
   "browserslist": [
     "> 1%",
     "last 10 versions",
