@@ -4,26 +4,30 @@
  */
 
 interface IImportResult {
-	template: string;
+    template: string;
 
-	assetPublicPath: string;
+    assetPublicPath: string;
 
-	execScripts<T>(sandbox?: object): Promise<T>;
+    execScripts<T>(sandbox?: object): Promise<T>;
 
-	getExternalScripts(): Promise<string[]>;
+    getExternalScripts(): Promise<string[]>;
 
-	getExternalStyleSheets(): Promise<string[]>;
+    getExternalStyleSheets(): Promise<string[]>;
 }
 
 type ImportEntryOpts = {
-	fetch?: Function;
-	getDomain?: Function;
-	getTemplate?: (string) => string;
+    fetch?: Function;
+    getDomain?: Function;
+    getTemplate?: (string) => string;
+}
+
+type ExecScriptsOpts = {
+    fetch?: Function;
 }
 
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
-export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ImportEntryOpts): Promise<T>;
+export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ExecScriptsOpts): Promise<T>;
 
 export default function importHTML(url: string, opts?: ImportEntryOpts): Promise<IImportResult>;
 
