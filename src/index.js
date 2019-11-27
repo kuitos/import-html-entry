@@ -80,7 +80,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 	));
 }
 
-function execScripts(entry, scripts, proxy = window, opts = {}) {
+export function execScripts(entry, scripts, proxy = window, opts = {}) {
 	const { fetch = defaultFetch } = opts;
 
 	return getExternalScripts(scripts, fetch)
