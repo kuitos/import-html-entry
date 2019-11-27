@@ -21,9 +21,6 @@ const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*)>/i;
 function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
-function defaultTemplateRules(tpl) {
-    return tpl
-}
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
@@ -37,22 +34,20 @@ export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'f
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
  * @param domain
- * @param customTemplateRules
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain,customTemplateRules) {
+export default function processTpl(tpl, domain) {
 
 	let scripts = [];
 	const styles = [];
 	let entry = null;
 
-    const templateRules = customTemplateRules || defaultTemplateRules;
-    const template =
-        templateRules(tpl)
-		/*
-		remove html comment first
-		*/
+	const template = tpl
+
+	/*
+    remove html comment first
+    */
 		.replace(HTML_COMMENT_REGEX, '')
 
 		.replace(LINK_TAG_REGEX, match => {

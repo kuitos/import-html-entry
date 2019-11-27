@@ -18,7 +18,7 @@ interface IImportResult {
 type ImportEntryOpts = {
 	fetch?: Function;
 	getDomain?: Function;
-	customTemplateRules?: (string) => string;
+	getTemplate?: (string) => string;
 }
 
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };

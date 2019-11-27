@@ -24,6 +24,9 @@ function defaultGetDomain(url) {
 		return '';
 	}
 }
+function defaultGetTemplate(tpl) {
+	return tpl
+}
 
 /**
  * convert external css link to inline style for performance optimization
@@ -143,14 +146,14 @@ function execScripts(entry, scripts, proxy = window, opts = {}) {
 }
 
 export default function importHTML(url, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain, customTemplateRules } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
 
 			const domain = getDomain(url);
 			const assetPublicPath = `${domain}/`;
-			const { template, scripts, entry, styles } = processTpl(html, domain, customTemplateRules);
+			const { template, scripts, entry, styles } = processTpl(getTemplate(html), domain);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
@@ -163,7 +166,7 @@ export default function importHTML(url, opts = {}) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain, customTemplateRules } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -171,7 +174,7 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, { fetch, getDomain, customTemplateRules });
+		return importHTML(entry, { fetch, getDomain, getTemplate });
 	}
 
 	// config entry
