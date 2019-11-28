@@ -11,6 +11,8 @@ const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
+const LINK_PRELOAD_OR_PREFETCH_REGEX = /\srel=('|")?(preload|prefetch)\1/;
+const LINK_HREF_REGEX = /.*\shref=('|")?([^>'"\s]+)/;
 const STYLE_TAG_REGEX = /<style[^>]*>[\s\S]*?<\/style>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=('|")?stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")?([^>'"\s]+)/;
@@ -75,6 +77,23 @@ export default function processTpl(tpl, domain) {
 
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
+				}
+			}
+
+			const preloadOrPrefetchType = !!match.match(LINK_PRELOAD_OR_PREFETCH_REGEX);
+			if (preloadOrPrefetchType) {
+				const linkHref = match.match(LINK_HREF_REGEX);
+
+				if (linkHref) {
+					const href = linkHref[2];
+					let newHref = href;
+
+					// 将相对路径的 prefetch preload 转换成绝对路径，prefetch preload 非核心资源，直接静默转换掉
+					if (href && !hasProtocol(href)) {
+						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
+						let linkReplaceSymbol = genLinkReplaceSymbol(newHref)
+						return linkReplaceSymbol + match.replace(href, newHref);
+					}
 				}
 			}
 
