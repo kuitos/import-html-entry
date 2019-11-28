@@ -86,13 +86,11 @@ export default function processTpl(tpl, domain) {
 
 				if (linkHref) {
 					const href = linkHref[2];
-					let newHref = href;
 
 					// 将相对路径的 prefetch preload 转换成绝对路径，prefetch preload 非核心资源，直接静默转换掉
 					if (href && !hasProtocol(href)) {
-						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
-						let linkReplaceSymbol = genLinkReplaceSymbol(newHref)
-						return linkReplaceSymbol + match.replace(href, newHref);
+						const newHref = domain + (href.startsWith('/') ? href : `/${href}`);
+						return match.replace(href, newHref);
 					}
 				}
 			}

@@ -67,8 +67,9 @@ test('test process-tpl', () => {
 
 	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
 	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') !== -1).toBeTruthy();
+	// prefetch/preload 资源不会被 replace
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
 	// 相对路径的补全 host
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeTruthy();
 	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
@@ -192,7 +193,7 @@ test('test resource with no quotation marks', () => {
 	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
 	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') !== -1).toBeTruthy();
 	// 相对路径的补全 host
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
 	expect(template.indexOf('<link rel="prefetch" href=http://kuitos.me/a3-ie6-polyfill.js>') !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
@@ -269,7 +270,7 @@ test('test resource mixing quotation marks', () => {
 	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
 	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') !== -1).toBeTruthy();
 	// 相对路径的补全 host
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
 	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
