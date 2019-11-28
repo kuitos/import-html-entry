@@ -15,14 +15,19 @@ interface IImportResult {
 	getExternalStyleSheets(): Promise<string[]>;
 }
 
-type ImportEntryOpts = {
-	fetch?: Function;
-}
 
+type ImportEntryOpts = {
+    fetch?: Function;
+    getDomain?: Function;
+    getTemplate?: (string) => string;
+}
+type ExecScriptsOpts = {
+    fetch?: Function;
+}
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
-export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ImportEntryOpts): Promise<T>;
+export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ExecScriptsOpts): Promise<T>;
 
-export default function importHTML(url: string, fetch?: Function): Promise<IImportResult>;
+export default function importHTML(url: string, opts?: ImportEntryOpts): Promise<IImportResult>;
 
 export function importEntry(entry: Entry, opts?: ImportEntryOpts): Promise<IImportResult>;

@@ -15,7 +15,7 @@ if (!window.fetch) {
 }
 const defaultFetch = window.fetch.bind(window);
 
-function getDomain(url) {
+function defaultGetDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
@@ -23,6 +23,10 @@ function getDomain(url) {
 	} catch (e) {
 		return '';
 	}
+}
+
+function defaultGetTemplate(tpl) {
+	return tpl;
 }
 
 /**
@@ -142,15 +146,15 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		});
 }
 
-export default function importHTML(url, fetch = defaultFetch) {
-
+export default function importHTML(url, opts = {}) {
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
 
 			const domain = getDomain(url);
 			const assetPublicPath = `${domain}/`;
-			const { template, scripts, entry, styles } = processTpl(html, domain);
+			const { template, scripts, entry, styles } = processTpl(getTemplate(html), domain);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
@@ -163,7 +167,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -171,7 +175,7 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, fetch);
+		return importHTML(entry, { fetch, getDomain, getTemplate });
 	}
 
 	// config entry
