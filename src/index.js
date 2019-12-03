@@ -138,7 +138,12 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					const inlineScript = scriptsText[i];
 
 					exec(scriptSrc, inlineScript, resolvePromise);
-					schedule(i + 1, resolvePromise);
+					// resolve the promise while the last script executed and entry not provided
+					if (!entry && i === scripts.length - 1) {
+						resolvePromise();
+					} else {
+						schedule(i + 1, resolvePromise);
+					}
 				}
 			}
 
