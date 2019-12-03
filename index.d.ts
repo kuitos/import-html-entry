@@ -17,9 +17,9 @@ interface IImportResult {
 
 
 type ImportEntryOpts = {
-    fetch?: Function;
-    getDomain?: Function;
-    getTemplate?: (string) => string;
+	fetch?: Function;
+	getDomain?: Function;
+	getTemplate?: (tpl: string) => string;
 }
 type ExecScriptsOpts = {
     fetch?: Function;
