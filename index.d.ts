@@ -28,6 +28,6 @@ export type Entry = string | { styles?: string[], scripts?: string[], html?: str
 
 export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ExecScriptsOpts): Promise<T>;
 
-export default function importHTML(url: string, opts?: ImportEntryOpts): Promise<IImportResult>;
+export default function importHTML(url: string, opts?: ImportEntryOpts | Function): Promise<IImportResult>;
 
 export function importEntry(entry: Entry, opts?: ImportEntryOpts): Promise<IImportResult>;

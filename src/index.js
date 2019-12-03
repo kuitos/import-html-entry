@@ -152,7 +152,19 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 }
 
 export default function importHTML(url, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
+	let fetch = defaultFetch;
+	let getDomain = defaultGetDomain;
+	let getTemplate = defaultGetTemplate;
+
+	// compatible with the legacy importHTML api
+	if (typeof opts === 'function') {
+		fetch = opts;
+	} else {
+		fetch = opts.fetch || defaultFetch;
+		getDomain = opts.getDomain || defaultGetDomain;
+		getTemplate = opts.getTemplate || defaultGetTemplate;
+	}
+
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(html => {
