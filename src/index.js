@@ -84,6 +84,9 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
 	const { fetch = defaultFetch } = opts;
 
+	if(scripts.length === 0){
+		return Promise.resolve({});
+	}
 	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
 
