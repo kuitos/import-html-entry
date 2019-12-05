@@ -178,7 +178,12 @@ export default function importHTML(url, opts = {}) {
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: proxy => execScripts(entry, scripts, proxy, { fetch }),
+				execScripts: proxy => {
+					if(!scripts.length){
+						return Promise.resolve();
+					}
+					return execScripts(entry, scripts, proxy, { fetch });
+				},
 			}));
 		}));
 };
@@ -205,7 +210,12 @@ export function importEntry(entry, opts = {}) {
 			assetPublicPath: '/',
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch }),
+			execScripts: proxy => {
+				if(!scripts.length){
+					return Promise.resolve();
+				}
+				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch });
+			},
 		}));
 
 	} else {
