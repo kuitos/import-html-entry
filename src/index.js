@@ -180,7 +180,7 @@ export default function importHTML(url, opts = {}) {
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 				execScripts: proxy => {
 					if(!scripts.length){
-						return Promise.resolve(true);
+						return Promise.resolve();
 					}
 					return execScripts(entry, scripts, proxy, { fetch });
 				},
@@ -212,7 +212,7 @@ export function importEntry(entry, opts = {}) {
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 			execScripts: proxy => {
 				if(!scripts.length){
-					return Promise.resolve(true);
+					return Promise.resolve();
 				}
 				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch });
 			},
