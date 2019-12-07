@@ -179,7 +179,7 @@ export default function importHTML(url, opts = {}) {
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 				execScripts: proxy => {
-					if(!scripts.length){
+					if (!scripts.length) {
 						return Promise.resolve();
 					}
 					return execScripts(entry, scripts, proxy, { fetch });
@@ -211,7 +211,7 @@ export function importEntry(entry, opts = {}) {
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 			execScripts: proxy => {
-				if(!scripts.length){
+				if (!scripts.length) {
 					return Promise.resolve();
 				}
 				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch });
