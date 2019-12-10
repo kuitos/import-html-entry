@@ -39,7 +39,7 @@
   "homepage": "https://github.com/kuitos/import-html-entry#readme",
   "browserslist": [
     "> 1%",
-    "last 10 versions",
+    "last 6 versions",
     "not ie <= 8"
   ],
   "devDependencies": {
