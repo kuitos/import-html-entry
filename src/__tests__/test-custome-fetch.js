@@ -13,14 +13,14 @@ test('test custome fetch importHTML', async done => {
 		});
 	});
 
-	const importHTML = jest.fn().mockImplementation((url, fetch) => {
+	const importHTML = jest.fn().mockImplementation((url, { fetch }) => {
 		return {
 			getExternalScripts: () => rawGetExternalScripts(['http://kuitos.me/index.js'], fetch),
 			getExternalStyleSheets: () => rawGetExternalStyleSheets(['http://kuitos.me/index.css'], fetch),
 		};
 	});
 
-	const { getExternalScripts, getExternalStyleSheets } = await importHTML('http://kuitos.me', (url) => fetch(url, { headers: mockHeaders }));
+	const { getExternalScripts, getExternalStyleSheets } = await importHTML('http://kuitos.me', { fetch: (url) => fetch(url, { headers: mockHeaders }) });
 	await getExternalScripts();
 	await getExternalStyleSheets();
 

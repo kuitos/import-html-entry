@@ -21,7 +21,7 @@ if (!window.fetch) {
 }
 const defaultFetch = window.fetch.bind(window);
 
-function getDomain(url) {
+function defaultGetDomain(url) {
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
@@ -29,6 +29,10 @@ function getDomain(url) {
 	} catch (e) {
 		return '';
 	}
+}
+
+function defaultGetTemplate(tpl) {
+	return tpl;
 }
 
 /**
@@ -142,7 +146,12 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					const inlineScript = scriptsText[i];
 
 					exec(scriptSrc, inlineScript, resolvePromise);
-					schedule(i + 1, resolvePromise);
+					// resolve the promise while the last script executed and entry not provided
+					if (!entry && i === scripts.length - 1) {
+						resolvePromise();
+					} else {
+						schedule(i + 1, resolvePromise);
+					}
 				}
 			}
 
@@ -150,12 +159,23 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		});
 }
 
-export default function importHTML(url, fetch = defaultFetch) {
+export default function importHTML(url, opts = {}) {
+	let fetch = defaultFetch;
+	let getDomain = defaultGetDomain;
+	let getTemplate = defaultGetTemplate;
+
+	// compatible with the legacy importHTML api
+	if (typeof opts === 'function') {
+		fetch = opts;
+	} else {
+		fetch = opts.fetch || defaultFetch;
+		getDomain = opts.getDomain || defaultGetDomain;
+		getTemplate = opts.getTemplate || defaultGetTemplate;
+	}
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
 		.then(response => response.text())
 		.then(async html => {
-
 			const domain = getDomain(url);
 			const assetPublicPath = `${domain}/`;
 			let modules = html.match(/\<meta name="autoModules" content=\'(\S*)?\'\>/);
@@ -172,7 +192,7 @@ export default function importHTML(url, fetch = defaultFetch) {
 				scripts,
 				entry,
 				styles
-			} = processTpl(html, domain);
+			} = processTpl(getTemplate(html), domain);
 			if (m.length >= 1) {
 				let SystemJS = window.SystemJS
 				let p = []
@@ -196,16 +216,21 @@ export default function importHTML(url, fetch = defaultFetch) {
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: proxy => execScripts(entry, scripts, proxy, {
-					fetch
-				}),
+				execScripts: proxy => {
+					if (!scripts.length) {
+						return Promise.resolve();
+					}
+					return execScripts(entry, scripts, proxy, {
+						fetch
+					});
+				},
 			}));
 		}));
 };
 
 export function importEntry(entry, opts = {}) {
 	const {
-		fetch = defaultFetch
+		fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate
 	} = opts;
 
 	if (!entry) {
@@ -214,7 +239,11 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, fetch);
+		return importHTML(entry, {
+			fetch,
+			getDomain,
+			getTemplate
+		});
 	}
 
 	// config entry
@@ -231,9 +260,14 @@ export function importEntry(entry, opts = {}) {
 			assetPublicPath: '/',
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: proxy => execScripts(scripts[scripts.length - 1], scripts, proxy, {
-				fetch
-			}),
+			execScripts: proxy => {
+				if (!scripts.length) {
+					return Promise.resolve();
+				}
+				return execScripts(scripts[scripts.length - 1], scripts, proxy, {
+					fetch
+				});
+			},
 		}));
 
 	} else {
