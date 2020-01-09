@@ -16,13 +16,13 @@ interface IImportResult {
 }
 
 
-type ImportEntryOpts = {
+export type ImportEntryOpts = {
 	fetch?: Function;
 	getDomain?: Function;
 	getTemplate?: (tpl: string) => string;
 }
 type ExecScriptsOpts = {
-    fetch?: Function;
+	fetch?: Function;
 }
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
