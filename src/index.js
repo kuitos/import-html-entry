@@ -16,12 +16,15 @@ if (!window.fetch) {
 const defaultFetch = window.fetch.bind(window);
 
 function defaultGetDomain(url) {
+	let tempUrl = null;
 	try {
+		tempUrl = url.startsWith('//') ? `${location.protocol}${url}` : url;
 		// URL 构造函数不支持使用 // 前缀的 url
-		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
+		const href = new URL(tempUrl);
 		return href.origin;
 	} catch (e) {
-		return '';
+		// 兼容ie11
+		return tempUrl || '';
 	}
 }
 
