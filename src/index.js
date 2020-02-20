@@ -81,6 +81,13 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 	));
 }
 
+const supportsUserTiming =
+	typeof performance !== 'undefined' &&
+	typeof performance.mark === 'function' &&
+	typeof performance.clearMarks === 'function' &&
+	typeof performance.measure === 'function' &&
+	typeof performance.clearMeasures === 'function';
+
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
 	const { fetch = defaultFetch } = opts;
 
@@ -95,7 +102,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				const markName = `Evaluating script ${scriptSrc}`;
 				const measureName = `Evaluating Time Consuming: ${scriptSrc}`;
 
-				if (process.env.NODE_ENV === 'development') {
+				if (process.env.NODE_ENV === 'development' && supportsUserTiming) {
 					performance.mark(markName);
 				}
 
@@ -124,7 +131,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 				}
 
-				if (process.env.NODE_ENV === 'development') {
+				if (process.env.NODE_ENV === 'development' && supportsUserTiming) {
 					performance.measure(measureName, markName);
 					performance.clearMarks(markName);
 					performance.clearMeasures(measureName);
