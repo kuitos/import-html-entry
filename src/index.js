@@ -21,6 +21,7 @@ function defaultGetDomain(url) {
 		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
 		return href.origin;
 	} catch (e) {
+		console.warn(e);
 		return '';
 	}
 }
