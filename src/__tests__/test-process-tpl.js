@@ -72,9 +72,9 @@ test('test process-tpl', () => {
 	// 相对路径的补全 host
 	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
 
-	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
-	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
-	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
+	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn/');
+	expect(styles[0]).toBe('http://kuitos.me/umi.css');
+	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });
 
@@ -104,15 +104,15 @@ test('test ignore js or css', () => {
 		'<div id="root"></div>\n' +
 		'\n' +
 		'<script ignore src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>\n' +
-		'<script src="/app.js"></script>\n' +
+		'<script src="./app.js"></script>\n' +
 		'<script ignore>alert(1)</script>\n' +
 		'<script ignore src="/polyfill.js"></script>\n' +
 		'\n' +
 		'\n' +
 		'</body></html>';
 
-	const { entry, template } = processTpl(tpl, 'http://kuitos.me');
-	expect(entry).toBe('http://kuitos.me/app.js');
+	const { entry, template } = processTpl(tpl, 'http://kuitos.me/cdn/');
+	expect(entry).toBe('http://kuitos.me/cdn/app.js');
 
 	expect(template.indexOf(genIgnoreAssetReplaceSymbol('style file')) !== -1).toBeTruthy();
 
@@ -197,8 +197,8 @@ test('test resource with no quotation marks', () => {
 	expect(template.indexOf('<link rel="prefetch" href=http://kuitos.me/a3-ie6-polyfill.js>') !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
-	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
-	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
+	expect(styles[0]).toBe('http://kuitos.me/umi.css');
+	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });
 
@@ -242,10 +242,10 @@ test('test resource mixing quotation marks', () => {
 		'\n' +
 		'<div id="root"></div>\n' +
 		'\n' +
-		'<script src=/umi.js></script>\n' +
+		'<script src=./umi.js></script>\n' +
 		'<!-- <script src=/a1.js></script>' +
 		'-->' +
-		'<script src="/comment.js"></script>\n' +
+		'<script src="./comment.js"></script>\n' +
 		'<!-- <script src=/a2.js></script>\n' +
 		'-->' +
 		'<!--[if IE 6]>\n' +
@@ -274,7 +274,7 @@ test('test resource mixing quotation marks', () => {
 	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
-	expect(styles[0]).toBe('http://kuitos.me/cdn/umi.css');
-	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/cdn/umi.css')) !== -1).toBeTruthy();
+	expect(styles[0]).toBe('http://kuitos.me/umi.css');
+	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });

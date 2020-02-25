@@ -58,6 +58,7 @@
     "globals": {
       "process.env.NODE_ENV": "test"
     },
+    "testURL": "http://test.com/path/",
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.js"
     ],

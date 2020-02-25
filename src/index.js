@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
+import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -14,17 +14,6 @@ if (!window.fetch) {
 	throw new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways');
 }
 const defaultFetch = window.fetch.bind(window);
-
-function defaultGetDomain(url) {
-	try {
-		// URL 构造函数不支持使用 // 前缀的 url
-		const href = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url);
-		return href.origin;
-	} catch (e) {
-		console.warn(e);
-		return '';
-	}
-}
 
 function defaultGetTemplate(tpl) {
 	return tpl;
@@ -161,7 +150,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 export default function importHTML(url, opts = {}) {
 	let fetch = defaultFetch;
-	let getDomain = defaultGetDomain;
+	let getPublicPath = defaultGetPublicPath;
 	let getTemplate = defaultGetTemplate;
 
 	// compatible with the legacy importHTML api
@@ -169,7 +158,7 @@ export default function importHTML(url, opts = {}) {
 		fetch = opts;
 	} else {
 		fetch = opts.fetch || defaultFetch;
-		getDomain = opts.getDomain || defaultGetDomain;
+		getPublicPath = opts.getPublicPath || opts.getDomain || defaultGetPublicPath;
 		getTemplate = opts.getTemplate || defaultGetTemplate;
 	}
 
@@ -177,7 +166,7 @@ export default function importHTML(url, opts = {}) {
 		.then(response => response.text())
 		.then(html => {
 
-			const domain = getDomain(url);
+			const domain = getPublicPath(url);
 			const assetPublicPath = `${domain}/`;
 			const { template, scripts, entry, styles } = processTpl(getTemplate(html), domain);
 
@@ -197,7 +186,8 @@ export default function importHTML(url, opts = {}) {
 };
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch, getDomain = defaultGetDomain, getTemplate = defaultGetTemplate } = opts;
+	const { fetch = defaultFetch, getTemplate = defaultGetTemplate } = opts;
+	const getPublicPath = opts.getPublicPath || opts.getDomain || defaultGetPublicPath;
 
 	if (!entry) {
 		throw new SyntaxError('entry should not be empty!');
@@ -205,7 +195,7 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, { fetch, getDomain, getTemplate });
+		return importHTML(entry, { fetch, getPublicPath, getTemplate });
 	}
 
 	// config entry
