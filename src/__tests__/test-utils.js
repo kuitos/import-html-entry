@@ -27,11 +27,13 @@ test('defaultGetPublicPath', () => {
 		// '//kuitos.me/index.html/#/a/c/d',
 		'//kuitos.me/a/b/c/index.html',
 		'//kuitos.me/index.html?test=2',
+		'//kuitos.me/test/vm/',
 	].map(defaultGetPublicPath);
 	expect(publicPaths2).toEqual([
 		'http://kuitos.me/',
 		// 'http://kuitos.me/',
 		'http://kuitos.me/a/b/c/',
 		'http://kuitos.me/',
+		'http://kuitos.me/test/vm/',
 	]);
 });

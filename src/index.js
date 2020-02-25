@@ -166,9 +166,8 @@ export default function importHTML(url, opts = {}) {
 		.then(response => response.text())
 		.then(html => {
 
-			const domain = getPublicPath(url);
-			const assetPublicPath = `${domain}/`;
-			const { template, scripts, entry, styles } = processTpl(getTemplate(html), domain);
+			const assetPublicPath = getPublicPath(url);
+			const { template, scripts, entry, styles } = processTpl(getTemplate(html), assetPublicPath);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
@@ -205,7 +204,7 @@ export function importEntry(entry, opts = {}) {
 
 		return getEmbedHTML(html, styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
-			assetPublicPath: '/',
+			assetPublicPath: getPublicPath('/'),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 			execScripts: proxy => {

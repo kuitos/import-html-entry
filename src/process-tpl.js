@@ -24,8 +24,8 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
 
-function getEntirePath(path, domain) {
-	return new URL(path, domain).toString();
+function getEntirePath(path, baseURI) {
+	return new URL(path, baseURI).toString();
 }
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
@@ -39,11 +39,11 @@ export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'f
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
- * @param domain
+ * @param baseURI
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain) {
+export default function processTpl(tpl, baseURI) {
 
 	let scripts = [];
 	const styles = [];
@@ -72,7 +72,7 @@ export default function processTpl(tpl, domain) {
 					let newHref = href;
 
 					if (href && !hasProtocol(href)) {
-						newHref = getEntirePath(href, domain);
+						newHref = getEntirePath(href, baseURI);
 					}
 					if (styleIgnore) {
 						return genIgnoreAssetReplaceSymbol(newHref);
@@ -92,7 +92,7 @@ export default function processTpl(tpl, domain) {
 
 					// 将相对路径的 prefetch preload 转换成绝对路径，prefetch preload 非核心资源，直接静默转换掉
 					if (href && !hasProtocol(href)) {
-						const newHref = getEntirePath(href, domain);
+						const newHref = getEntirePath(href, baseURI);
 						return match.replace(href, newHref);
 					}
 				}
@@ -126,7 +126,7 @@ export default function processTpl(tpl, domain) {
 
 					// append the domain while the script not have an protocol prefix
 					if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-						matchedScriptSrc = getEntirePath(matchedScriptSrc, domain);
+						matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
 					}
 
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
