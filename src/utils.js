@@ -54,3 +54,16 @@ export function getInlineCode(match) {
 	return match.substring(start, end);
 }
 
+export function defaultGetPublicPath(url) {
+	try {
+		// URL 构造函数不支持使用 // 前缀的 url
+		const { origin, pathname } = new URL(url.startsWith('//') ? `${location.protocol}${url}` : url, location.href);
+		const paths = pathname.split('/');
+		// 移除最后一个元素
+		paths.pop();
+		return `${origin}${paths.join('/')}/`;
+	} catch (e) {
+		console.warn(e);
+		return '';
+	}
+}
