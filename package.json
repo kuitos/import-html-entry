@@ -20,6 +20,7 @@
     "build:lib": "rm -fr ./lib && BABEL_ENV=lib babel ./src --out-dir ./lib --ignore 'src/**/__tests__/**/*.js'",
     "build:esm": "rm -fr ./esm && babel ./src --out-dir ./esm --ignore 'src/**/__tests__/**/*.js'",
     "prepush": "npm run lint",
+    "prepublishOnly": "npm run build",
     "release": "np --no-cleanup --yolo --no-publish",
     "test": "jest --no-cache"
   },
