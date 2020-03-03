@@ -202,7 +202,7 @@ export function importEntry(entry, opts = {}) {
 
 		const { scripts = [], styles = [], html = '' } = entry;
 
-		return getEmbedHTML(html, styles, { fetch }).then(embedHTML => ({
+		return getEmbedHTML(getTemplate(html), styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
 			assetPublicPath: getPublicPath('/'),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
