@@ -30,6 +30,10 @@ test('test process-tpl', () => {
 		'  src="https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js"\n' +
 		'  crossorigin="anonymous"' +
 		'></script>' +
+		'<script \n' +
+		'  src="/test-async.js"\n' +
+		'  async' +
+		'></script>' +
 		'<style>\n' +
 		'body {\n' +
 		'background-color: red;\n' +
@@ -55,12 +59,18 @@ test('test process-tpl', () => {
 
 	const { entry, scripts, template } = processTpl(tpl, 'http://kuitos.me');
 	expect(entry).toBe('http://kuitos.me/comment.js');
-	expect(scripts).toEqual(['<script data-test>\n  window.routerBase = "/";\n</script>',
+	expect(scripts).toEqual([
+		'<script data-test>\n  window.routerBase = "/";\n</script>',
 		'<script \n data-test>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
+		{
+			async: true,
+			src: 'http://kuitos.me/test-async.js',
+		},
 		'http://kuitos.me/umi.js',
 		'http://kuitos.me/comment.js']);
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/test-async.js', true)) !== -1).toBeTruthy();
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();

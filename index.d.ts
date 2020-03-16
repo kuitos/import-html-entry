@@ -15,10 +15,9 @@ interface IImportResult {
 	getExternalStyleSheets(): Promise<string[]>;
 }
 
-
 export type ImportEntryOpts = {
-	fetch?: Function;
-	getDomain?: Function;
+	fetch?: typeof window.fetch;
+	getPublicPath?: (rawPublicPath: string) => string;
 	getTemplate?: (tpl: string) => string;
 }
 type ExecScriptsOpts = {

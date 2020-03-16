@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol } from './process-tpl';
-import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps } from './utils';
+import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -58,14 +58,31 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 
 // for prefetch
 export function getExternalScripts(scripts, fetch = defaultFetch) {
+
+	const fetchScript = scriptUrl => scriptCache[scriptUrl] ||
+		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => response.text()));
+
 	return Promise.all(scripts.map(script => {
-			if (script.startsWith('<')) {
-				// if it is inline script
-				return getInlineCode(script);
+
+			if (typeof script === 'string') {
+				if (script.startsWith('<')) {
+					// if it is inline script
+					return getInlineCode(script);
+				} else {
+					// external script
+					return fetchScript(script);
+				}
 			} else {
-				// external script
-				return scriptCache[script] ||
-					(scriptCache[script] = fetch(script).then(response => response.text()));
+				// use idle time to load async script
+				const { src, async } = script;
+				if (async) {
+					return {
+						async: true,
+						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src).then(resolve, reject))),
+					};
+				}
+
+				return fetchScript(src);
 			}
 		},
 	));
@@ -111,14 +128,23 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					resolve(exports);
 
 				} else {
-					try {
-						// bind window.proxy to change `this` reference in script
-						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
-					} catch (e) {
-						console.error(`error occurs while executing ${scriptSrc}`);
-						throw e;
-					}
 
+					if (typeof inlineScript === 'string') {
+						try {
+							// bind window.proxy to change `this` reference in script
+							geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
+						} catch (e) {
+							console.error(`error occurs while executing ${scriptSrc}`);
+							throw e;
+						}
+					} else {
+						inlineScript.async && inlineScript?.content
+							.then(downloadedScriptText => geval(`;(function(window){;${downloadedScriptText}\n}).bind(window.proxy)(window.proxy);`))
+							.catch(e => {
+								console.error(`error occurs while executing async script ${scriptSrc?.src}`);
+								throw e;
+							});
+					}
 				}
 
 				if (process.env.NODE_ENV === 'development' && supportsUserTiming) {
