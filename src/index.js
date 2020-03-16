@@ -77,8 +77,8 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 				const { src, async } = script;
 				if (async) {
 					return {
-						async,
-						src: new Promise(resolve => requestIdleCallback(() => fetchScript(src).then(resolve))),
+						async: true,
+						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src).then(resolve, reject))),
 					};
 				}
 
@@ -129,7 +129,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 				} else {
 
-					if (typeof scriptSrc === 'string' || !scriptSrc.async) {
+					if (typeof inlineScript === 'string') {
 						try {
 							// bind window.proxy to change `this` reference in script
 							geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
@@ -138,7 +138,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 							throw e;
 						}
 					} else {
-						scriptSrc?.src
+						inlineScript.async && inlineScript?.content
 							.then(downloadedScriptText => geval(`;(function(window){;${downloadedScriptText}\n}).bind(window.proxy)(window.proxy);`))
 							.catch(e => {
 								console.error(`error occurs while executing async script ${scriptSrc?.src}`);
