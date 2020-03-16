@@ -67,3 +67,18 @@ export function defaultGetPublicPath(url) {
 		return '';
 	}
 }
+
+// RIC and shim for browsers setTimeout() without it
+export const requestIdleCallback =
+	window.requestIdleCallback ||
+	function requestIdleCallback(cb) {
+		const start = Date.now();
+		return setTimeout(() => {
+			cb({
+				didTimeout: false,
+				timeRemaining() {
+					return Math.max(0, 50 - (Date.now() - start));
+				},
+			});
+		}, 1);
+	};

@@ -9,6 +9,7 @@ const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
+const SCRIPT_ASYNC_REGEX = /.*\sasync\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
 const LINK_PRELOAD_OR_PREFETCH_REGEX = /\srel=('|")?(preload|prefetch)\1/;
@@ -29,7 +30,7 @@ function getEntirePath(path, baseURI) {
 }
 
 export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
-export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
+export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 /**
@@ -137,8 +138,9 @@ export default function processTpl(tpl, baseURI) {
 				}
 
 				if (matchedScriptSrc) {
-					scripts.push(matchedScriptSrc);
-					return genScriptReplaceSymbol(matchedScriptSrc);
+					const asyncScript = !!match.match(SCRIPT_ASYNC_REGEX);
+					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
+					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
 				}
 
 				return match;
