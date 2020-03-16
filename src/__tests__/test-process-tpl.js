@@ -75,12 +75,12 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 
-	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
-	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') !== -1).toBeTruthy();
-	// prefetch/preload 资源不会被 replace
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
-	// 相对路径的补全 host
-	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
+	// preload 资源直接被 ignore
+	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') === -1).toBeTruthy();
+	// prefetch/preload 会被 replace
+	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) !== -1).toBeTruthy();
+	// prefetch 资源直接被 ignore
+	expect(template.indexOf('<link rel="prefetch" href="/a3-ie6-polyfill.js">') === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn/');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
@@ -200,11 +200,11 @@ test('test resource with no quotation marks', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 
-	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
-	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') !== -1).toBeTruthy();
-	// 相对路径的补全 host
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
-	expect(template.indexOf('<link rel="prefetch" href=http://kuitos.me/a3-ie6-polyfill.js>') !== -1).toBeTruthy();
+	// preload 资源直接被忽略
+	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') === -1).toBeTruthy();
+	// preload/prefetch 资源被 replace
+	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) !== -1).toBeTruthy();
+	expect(template.indexOf('<link rel="prefetch" href=http://kuitos.me/a3-ie6-polyfill.js>') === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
@@ -277,11 +277,11 @@ test('test resource mixing quotation marks', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 
-	// 验证 preload prefetch 补全 host 功能，绝对路径的不受影响
-	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') !== -1).toBeTruthy();
+	// preload/prefetch 资源直接被 ignore
+	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') === -1).toBeTruthy();
 	// 相对路径的补全 host
-	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/a3-ie6-polyfill.js')) !== -1).toBeFalsy();
-	expect(template.indexOf('<link rel="prefetch" href="http://kuitos.me/a3-ie6-polyfill.js">') !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) === -1).toBeFalsy();
+	expect(template.indexOf('<link rel="prefetch" href="/a3-ie6-polyfill.js">') === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
