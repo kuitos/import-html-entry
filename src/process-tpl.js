@@ -28,7 +28,7 @@ function getEntirePath(path, baseURI) {
 	return new URL(path, baseURI).toString();
 }
 
-export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
+export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
 export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
@@ -83,19 +83,10 @@ export default function processTpl(tpl, baseURI) {
 				}
 			}
 
-			const preloadOrPrefetchType = !!match.match(LINK_PRELOAD_OR_PREFETCH_REGEX);
+			const preloadOrPrefetchType = match.match(LINK_PRELOAD_OR_PREFETCH_REGEX) && match.match(LINK_HREF_REGEX);
 			if (preloadOrPrefetchType) {
-				const linkHref = match.match(LINK_HREF_REGEX);
-
-				if (linkHref) {
-					const href = linkHref[2];
-
-					// 将相对路径的 prefetch preload 转换成绝对路径，prefetch preload 非核心资源，直接静默转换掉
-					if (href && !hasProtocol(href)) {
-						const newHref = getEntirePath(href, baseURI);
-						return match.replace(href, newHref);
-					}
-				}
+				const [, , linkHref] = match.match(LINK_HREF_REGEX);
+				return genLinkReplaceSymbol(linkHref, true);
 			}
 
 			return match;
