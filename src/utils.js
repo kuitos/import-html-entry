@@ -12,6 +12,8 @@ let firstGlobalProp, secondGlobalProp, lastGlobalProp;
 export function getGlobalProp() {
 	let cnt = 0;
 	let lastProp;
+	let hasIframe = false;
+
 	for (let p in global) {
 		// do not check frames cause it could be removed during import
 		if (
@@ -20,7 +22,17 @@ export function getGlobalProp() {
 			(isIE && global[p] && global[p].parent === window)
 		)
 			continue;
-		if (cnt === 0 && p !== firstGlobalProp || cnt === 1 && p !== secondGlobalProp)
+
+		// 遍历 iframe，检查 window 上的属性值是否是 iframe，是则跳过后面的 first 和 second 判断
+		for (let i = 0; i < window.frames.length && !hasIframe; i++) {
+			const frame = window.frames[i];
+			if (frame === global[p]) {
+				hasIframe = true;
+				break;
+			}
+		}
+
+		if (!hasIframe && (cnt === 0 && p !== firstGlobalProp || cnt === 1 && p !== secondGlobalProp))
 			return p;
 		cnt++;
 		lastProp = p;
