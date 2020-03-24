@@ -177,8 +177,10 @@ export default function importHTML(url, opts = {}) {
 		.then(response => response.text())
 		.then(async html => {
 			const domain = getDomain(url);
-			const assetPublicPath = `${domain}/`;
-			let modules = html.match(/\<meta name="autoModules" content=\'(\S*)?\'\>/);
+      const assetPublicPath = `${domain}/`;
+      let doc = document.createRange().createContextualFragment(html);
+      let modules = doc.querySelector('meta[name="autoModules"]').content
+			// let modules = html.match(/\<meta name="autoModules" content=\'(\S*)?\'\>/);
 			let m = JSON.parse(modules ? modules[1] : '[]')
 			if (m.length >= 1) {
 				let scriptsString = ''
