@@ -5,24 +5,33 @@
  * fork from https://github.com/systemjs/systemjs/blob/master/src/extras/global.js
  */
 
-let firstGlobalProp, secondGlobalProp, lastGlobalProp;
+const isIE = navigator.userAgent.indexOf('Trident') !== -1;
 
+// safari unpredictably lists some new globals first or second in object order
+let firstGlobalProp, secondGlobalProp, lastGlobalProp;
 export function getGlobalProp() {
 	let cnt = 0;
 	let lastProp;
 	let hasIframe = false;
+
 	for (let p in global) {
-		if (!global.hasOwnProperty(p))
+		// do not check frames cause it could be removed during import
+		if (
+			!global.hasOwnProperty(p) ||
+			(!isNaN(p) && p < global.length) ||
+			(isIE && global[p] && global[p].parent === window)
+		)
 			continue;
 
 		// 遍历 iframe，检查 window 上的属性值是否是 iframe，是则跳过后面的 first 和 second 判断
-		for (let i = 0; i < window.frames.length; i++) {
+		for (let i = 0; i < window.frames.length && !hasIframe; i++) {
 			const frame = window.frames[i];
 			if (frame === global[p]) {
 				hasIframe = true;
 				break;
 			}
 		}
+
 		if (!hasIframe && (cnt === 0 && p !== firstGlobalProp || cnt === 1 && p !== secondGlobalProp))
 			return p;
 		cnt++;
@@ -37,7 +46,12 @@ export function noteGlobalProps() {
 	// but this may be faster (pending benchmarks)
 	firstGlobalProp = secondGlobalProp = undefined;
 	for (let p in global) {
-		if (!global.hasOwnProperty(p))
+		// do not check frames cause it could be removed during import
+		if (
+			!global.hasOwnProperty(p) ||
+			(!isNaN(p) && p < global.length) ||
+			(isIE && global[p] && global[p].parent === window)
+		)
 			continue;
 		if (!firstGlobalProp)
 			firstGlobalProp = p;

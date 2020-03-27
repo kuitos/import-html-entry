@@ -11,7 +11,7 @@ const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
 if (!window.fetch) {
-	throw new Error('There is no fetch on the window env, You can get polyfill in https://polyfill.io/ or the other ways');
+	throw new Error('[import-html-entry] Here is no "fetch" on the window env, you need to polyfill it');
 }
 const defaultFetch = window.fetch.bind(window);
 
