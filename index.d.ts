@@ -24,6 +24,7 @@ export type ImportEntryOpts = {
 type ExecScriptsOpts = Pick<ImportEntryOpts, 'fetch'> & {
 	strictGlobal?: boolean;
 }
+
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
 export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ExecScriptsOpts): Promise<T>;
