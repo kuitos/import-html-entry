@@ -20,6 +20,7 @@
     "build:lib": "rm -fr ./lib && BABEL_ENV=lib babel ./src --out-dir ./lib --ignore 'src/**/__tests__/**/*.js'",
     "build:esm": "rm -fr ./esm && babel ./src --out-dir ./esm --ignore 'src/**/__tests__/**/*.js'",
     "prepush": "npm run lint",
+    "prepublishOnly": "npm run build",
     "release": "np --no-cleanup --yolo --no-publish",
     "test": "jest --no-cache"
   },
@@ -39,12 +40,13 @@
   "homepage": "https://github.com/mayako21126/import-html-entry#readme",
   "browserslist": [
     "> 1%",
-    "last 10 versions",
+    "last 6 versions",
     "not ie <= 8"
   ],
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2",
@@ -58,6 +60,7 @@
     "globals": {
       "process.env.NODE_ENV": "test"
     },
+    "testURL": "http://test.com/path/",
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.js"
     ],

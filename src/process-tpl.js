@@ -9,6 +9,7 @@ const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
+const SCRIPT_ASYNC_REGEX = /.*\sasync\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
 const LINK_PRELOAD_OR_PREFETCH_REGEX = /\srel=('|")?(preload|prefetch)\1/;
@@ -24,10 +25,15 @@ function hasProtocol(url) {
 	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
 }
 
-export const genLinkReplaceSymbol = linkHref => `<!-- link ${linkHref} replaced by import-html-entry -->`;
-export const genScriptReplaceSymbol = scriptSrc => `<!-- script ${scriptSrc} replaced by import-html-entry -->`;
+function getEntirePath(path, baseURI) {
+	return new URL(path, baseURI).toString();
+}
+
+export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
+export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
+
 /**
  * parse the script link from the template
  * 1. collect stylesheets
@@ -35,11 +41,11 @@ export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'f
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function#Difference_between_Function_constructor_and_function_declaration
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
- * @param domain
+ * @param baseURI
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
-export default function processTpl(tpl, domain) {
+export default function processTpl(tpl, baseURI) {
 
 	let scripts = [];
 	const styles = [];
@@ -68,8 +74,7 @@ export default function processTpl(tpl, domain) {
 					let newHref = href;
 
 					if (href && !hasProtocol(href)) {
-						// 处理一下使用相对路径的场景
-						newHref = domain + (href.startsWith('/') ? href : `/${href}`);
+						newHref = getEntirePath(href, baseURI);
 					}
 					if (styleIgnore) {
 						return genIgnoreAssetReplaceSymbol(newHref);
@@ -80,19 +85,10 @@ export default function processTpl(tpl, domain) {
 				}
 			}
 
-			const preloadOrPrefetchType = !!match.match(LINK_PRELOAD_OR_PREFETCH_REGEX);
+			const preloadOrPrefetchType = match.match(LINK_PRELOAD_OR_PREFETCH_REGEX) && match.match(LINK_HREF_REGEX);
 			if (preloadOrPrefetchType) {
-				const linkHref = match.match(LINK_HREF_REGEX);
-
-				if (linkHref) {
-					const href = linkHref[2];
-
-					// 将相对路径的 prefetch preload 转换成绝对路径，prefetch preload 非核心资源，直接静默转换掉
-					if (href && !hasProtocol(href)) {
-						const newHref = domain + (href.startsWith('/') ? href : `/${href}`);
-						return match.replace(href, newHref);
-					}
-				}
+				const [, , linkHref] = match.match(LINK_HREF_REGEX);
+				return genLinkReplaceSymbol(linkHref, true);
 			}
 
 			return match;
@@ -123,7 +119,7 @@ export default function processTpl(tpl, domain) {
 
 					// append the domain while the script not have an protocol prefix
 					if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-						matchedScriptSrc = domain + (matchedScriptSrc.startsWith('/') ? matchedScriptSrc : `/${matchedScriptSrc}`);
+						matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
 					}
 
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
@@ -134,8 +130,9 @@ export default function processTpl(tpl, domain) {
 				}
 
 				if (matchedScriptSrc) {
-					scripts.push(matchedScriptSrc);
-					return genScriptReplaceSymbol(matchedScriptSrc);
+					const asyncScript = !!match.match(SCRIPT_ASYNC_REGEX);
+					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
+					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
 				}
 
 				return match;

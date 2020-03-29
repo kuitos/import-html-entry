@@ -1,17 +1,5 @@
-<!--
- * @Description: 
- * @Version: 2.0
- * @Autor: mayako
- * @Date: 2019-11-26 10:25:50
- * @LastEditors: mayako
- * @LastEditTime: 2019-11-26 15:37:08
- -->
 # import-html-entry
 Treats the index html as manifest and loads the assets(css,js), and get the entry script exports.
-
-
-## Complete the automatic import of dependencies with babel-plugin-auto-import 
-### Usage has not changed
 
 ```html
 <!-- subApp/index.html -->
