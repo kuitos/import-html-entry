@@ -9,12 +9,16 @@ const isIE = navigator.userAgent.indexOf('Trident') !== -1;
 
 // safari unpredictably lists some new globals first or second in object order
 let firstGlobalProp, secondGlobalProp, lastGlobalProp;
-export function getGlobalProp() {
+
+export function getGlobalProp(global) {
 	let cnt = 0;
 	let lastProp;
 	let hasIframe = false;
 
-	for (let p in global) {
+	// use Object.keys to make it trigger the trap if global is proxy
+	const props = Object.keys(global);
+	for (let i = 0; i < props.length; i++) {
+		const p = props[i];
 		// do not check frames cause it could be removed during import
 		if (
 			!global.hasOwnProperty(p) ||
@@ -37,15 +41,18 @@ export function getGlobalProp() {
 		cnt++;
 		lastProp = p;
 	}
+
 	if (lastProp !== lastGlobalProp)
 		return lastProp;
 }
 
-export function noteGlobalProps() {
-	// alternatively Object.keys(global).pop()
-	// but this may be faster (pending benchmarks)
+export function noteGlobalProps(global) {
 	firstGlobalProp = secondGlobalProp = undefined;
-	for (let p in global) {
+
+	// use Object.keys to make it trigger the trap if global is proxy
+	const props = Object.keys(global);
+	for (let i = 0; i < props.length; i++) {
+		const p = props[i];
 		// do not check frames cause it could be removed during import
 		if (
 			!global.hasOwnProperty(p) ||
@@ -59,6 +66,7 @@ export function noteGlobalProps() {
 			secondGlobalProp = p;
 		lastGlobalProp = p;
 	}
+
 	return lastGlobalProp;
 }
 

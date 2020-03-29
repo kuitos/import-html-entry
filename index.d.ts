@@ -8,7 +8,7 @@ interface IImportResult {
 
 	assetPublicPath: string;
 
-	execScripts<T>(sandbox?: object): Promise<T>;
+	execScripts<T>(sandbox?: object, strictGlobal?: boolean): Promise<T>;
 
 	getExternalScripts(): Promise<string[]>;
 
@@ -20,9 +20,11 @@ export type ImportEntryOpts = {
 	getPublicPath?: (rawPublicPath: string) => string;
 	getTemplate?: (tpl: string) => string;
 }
-export type ExecScriptsOpts = {
-	fetch?: Function;
+
+type ExecScriptsOpts = Pick<ImportEntryOpts, 'fetch'> & {
+	strictGlobal?: boolean;
 }
+
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
 
 export function execScripts<T>(entry: string | null, scripts: string[], proxy: Window, opts?: ExecScriptsOpts): Promise<T>;
