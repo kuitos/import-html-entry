@@ -20,7 +20,7 @@ export type ImportEntryOpts = {
 	getPublicPath?: (rawPublicPath: string) => string;
 	getTemplate?: (tpl: string) => string;
 }
-type ExecScriptsOpts = {
+export type ExecScriptsOpts = {
 	fetch?: Function;
 }
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
