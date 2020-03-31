@@ -15,10 +15,7 @@ export function getGlobalProp(global) {
 	let lastProp;
 	let hasIframe = false;
 
-	// use Object.keys to make it trigger the trap if global is proxy
-	const props = Object.keys(global);
-	for (let i = 0; i < props.length; i++) {
-		const p = props[i];
+	for (let p in global) {
 		// do not check frames cause it could be removed during import
 		if (
 			!global.hasOwnProperty(p) ||
@@ -46,13 +43,12 @@ export function getGlobalProp(global) {
 		return lastProp;
 }
 
+// alternatively Object.keys(global).pop()
+// but this may be faster (pending benchmarks)
 export function noteGlobalProps(global) {
 	firstGlobalProp = secondGlobalProp = undefined;
 
-	// use Object.keys to make it trigger the trap if global is proxy
-	const props = Object.keys(global);
-	for (let i = 0; i < props.length; i++) {
-		const p = props[i];
+	for (let p in global) {
 		// do not check frames cause it could be removed during import
 		if (
 			!global.hasOwnProperty(p) ||
