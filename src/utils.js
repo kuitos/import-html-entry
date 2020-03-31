@@ -43,9 +43,9 @@ export function getGlobalProp(global) {
 		return lastProp;
 }
 
-// alternatively Object.keys(global).pop()
-// but this may be faster (pending benchmarks)
 export function noteGlobalProps(global) {
+	// alternatively Object.keys(global).pop()
+	// but this may be faster (pending benchmarks)
 	firstGlobalProp = secondGlobalProp = undefined;
 
 	for (let p in global) {
