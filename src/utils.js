@@ -8,17 +8,21 @@
 const isIE11 = typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Trident') !== -1;
 
 function shouldSkipProperty(p) {
-	if (global.hasOwnProperty(p))
-		return false
-	if (!(!isNaN(p) && p < global.length))
-		return false
-
-	// https://github.com/kuitos/import-html-entry/pull/32
-	try {
-		if (!(isIE11 && global[p] && global[p].parent === window))
-			return false
-	} catch (err) {
+	if (
+		!global.hasOwnProperty(p) ||
+		!isNaN(p) && p < global.length
+	)
 		return true
+
+	if (isIE11) {
+		// https://github.com/kuitos/import-html-entry/pull/32，最小化 try 范围
+		try {
+			return global[p] && global[p].parent === window
+		} catch (err) {
+			return true
+		}
+	} else {
+		return false
 	}
 }
 
@@ -31,7 +35,6 @@ export function getGlobalProp(global) {
 	let hasIframe = false;
 
 	for (let p in global) {
-		// do not check frames cause it could be removed during import
 		if (shouldSkipProperty())
 			continue;
 
@@ -60,7 +63,6 @@ export function noteGlobalProps(global) {
 	firstGlobalProp = secondGlobalProp = undefined;
 
 	for (let p in global) {
-		// do not check frames cause it could be removed during import
 		if (shouldSkipProperty())
 			continue;
 		if (!firstGlobalProp)
