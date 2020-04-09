@@ -5,7 +5,22 @@
  * fork from https://github.com/systemjs/systemjs/blob/master/src/extras/global.js
  */
 
-const isIE = navigator.userAgent.indexOf('Trident') !== -1;
+const isIE11 = typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Trident') !== -1;
+
+function shouldSkipProperty(p) {
+	if (global.hasOwnProperty(p))
+		return false
+	if (!(!isNaN(p) && p < global.length))
+		return false
+
+	// https://github.com/kuitos/import-html-entry/pull/32
+	try {
+		if (!(isIE11 && global[p] && global[p].parent === window))
+			return false
+	} catch (err) {
+		return true
+	}
+}
 
 // safari unpredictably lists some new globals first or second in object order
 let firstGlobalProp, secondGlobalProp, lastGlobalProp;
@@ -17,11 +32,7 @@ export function getGlobalProp(global) {
 
 	for (let p in global) {
 		// do not check frames cause it could be removed during import
-		if (
-			!global.hasOwnProperty(p) ||
-			(!isNaN(p) && p < global.length) ||
-			(isIE && global[p] && global[p].parent === window)
-		)
+		if (shouldSkipProperty())
 			continue;
 
 		// 遍历 iframe，检查 window 上的属性值是否是 iframe，是则跳过后面的 first 和 second 判断
@@ -50,21 +61,13 @@ export function noteGlobalProps(global) {
 
 	for (let p in global) {
 		// do not check frames cause it could be removed during import
-		try {
-			if (
-				!global.hasOwnProperty(p) ||
-				(!isNaN(p) && p < global.length) ||
-				(isIE && global[p] && global[p].parent === window)
-			)
-				continue;
-			if (!firstGlobalProp)
-				firstGlobalProp = p;
-			else if (!secondGlobalProp)
-				secondGlobalProp = p;
-			lastGlobalProp = p;
-		} catch (er) {
-			continue
-		}
+		if (shouldSkipProperty())
+			continue;
+		if (!firstGlobalProp)
+			firstGlobalProp = p;
+		else if (!secondGlobalProp)
+			secondGlobalProp = p;
+		lastGlobalProp = p;
 	}
 
 	return lastGlobalProp;
