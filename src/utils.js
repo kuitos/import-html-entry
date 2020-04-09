@@ -50,17 +50,21 @@ export function noteGlobalProps(global) {
 
 	for (let p in global) {
 		// do not check frames cause it could be removed during import
-		if (
-			!global.hasOwnProperty(p) ||
-			(!isNaN(p) && p < global.length) ||
-			(isIE && global[p] && global[p].parent === window)
-		)
-			continue;
-		if (!firstGlobalProp)
-			firstGlobalProp = p;
-		else if (!secondGlobalProp)
-			secondGlobalProp = p;
-		lastGlobalProp = p;
+		try {
+			if (
+				!global.hasOwnProperty(p) ||
+				(!isNaN(p) && p < global.length) ||
+				(isIE && global[p] && global[p].parent === window)
+			)
+				continue;
+			if (!firstGlobalProp)
+				firstGlobalProp = p;
+			else if (!secondGlobalProp)
+				secondGlobalProp = p;
+			lastGlobalProp = p;
+		} catch (er) {
+			continue
+		}
 	}
 
 	return lastGlobalProp;
