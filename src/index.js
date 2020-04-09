@@ -42,7 +42,7 @@ function getEmbedHTML(template, styles, opts = {}) {
 
 function getExecutableScript(scriptText, proxy) {
 	window.proxy = proxy;
-	return `;(function(window, self){;${scriptText}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
+	return `;(function(window, self){with(window){;${scriptText}\n}}).bind(window.proxy)(window.proxy, window.proxy);`;
 }
 
 // for prefetch
