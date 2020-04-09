@@ -211,11 +211,13 @@ export default function importHTML(url, opts = {}) {
 			const { template, scripts, entry, styles } = processTpl(getTemplate(html), assetPublicPath);
       if (m.length >= 1) {
 				let SystemJS = window.SystemJS
-				let p = []
+        let p = []
 				if (m.length !== 0) {
-					m[0].forEach((item) => {
-						const pi = SystemJS.import(item)
-						p.push(pi)
+					m[0].forEach((item,i) => {
+            if(!window[m[0][i]]){
+              const pi = SystemJS.import(item)
+              p.push(pi)
+            }
 					})
 					await Promise.all(p).then((list) => {
 						list.forEach((item, i) => {
