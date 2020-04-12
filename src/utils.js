@@ -7,17 +7,17 @@
 
 const isIE11 = typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Trident') !== -1;
 
-function shouldSkipProperty(p) {
+function shouldSkipProperty(global, p) {
 	if (
 		!global.hasOwnProperty(p) ||
 		!isNaN(p) && p < global.length
 	)
-		return true
+		return true;
 
 	if (isIE11) {
 		// https://github.com/kuitos/import-html-entry/pull/32，最小化 try 范围
 		try {
-			return global[p] && global[p].parent === window
+			return global[p] && global[p].parent === window;
 		} catch (err) {
 			return true
 		}
@@ -35,7 +35,7 @@ export function getGlobalProp(global) {
 	let hasIframe = false;
 
 	for (let p in global) {
-		if (shouldSkipProperty())
+		if (shouldSkipProperty(global, p))
 			continue;
 
 		// 遍历 iframe，检查 window 上的属性值是否是 iframe，是则跳过后面的 first 和 second 判断
@@ -63,7 +63,7 @@ export function noteGlobalProps(global) {
 	firstGlobalProp = secondGlobalProp = undefined;
 
 	for (let p in global) {
-		if (shouldSkipProperty())
+		if (shouldSkipProperty(global, p))
 			continue;
 		if (!firstGlobalProp)
 			firstGlobalProp = p;

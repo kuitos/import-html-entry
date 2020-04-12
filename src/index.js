@@ -40,9 +40,12 @@ function getEmbedHTML(template, styles, opts = {}) {
 		});
 }
 
-function getExecutableScript(scriptText, proxy) {
+function getExecutableScript(scriptText, proxy, strictGlobal) {
 	window.proxy = proxy;
-	return `;(function(window, self){with(window){;${scriptText}\n}}).bind(window.proxy)(window.proxy, window.proxy);`;
+	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
+	return strictGlobal
+		? `;(function(window, self){with(window){;${scriptText}\n}}).bind(window.proxy)(window.proxy, window.proxy);`
+		: `;(function(window, self){;${scriptText}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
 }
 
 // for prefetch
@@ -122,7 +125,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 					try {
 						// bind window.proxy to change `this` reference in script
-						geval(getExecutableScript(inlineScript, proxy));
+						geval(getExecutableScript(inlineScript, proxy, strictGlobal));
 					} catch (e) {
 						console.error(`error occurs while executing the entry ${scriptSrc}`);
 						throw e;
@@ -136,7 +139,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					if (typeof inlineScript === 'string') {
 						try {
 							// bind window.proxy to change `this` reference in script
-							geval(getExecutableScript(inlineScript, proxy));
+							geval(getExecutableScript(inlineScript, proxy, strictGlobal));
 						} catch (e) {
 							console.error(`error occurs while executing ${scriptSrc}`);
 							throw e;
