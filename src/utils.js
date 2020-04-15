@@ -5,22 +5,37 @@
  * fork from https://github.com/systemjs/systemjs/blob/master/src/extras/global.js
  */
 
-const isIE = navigator.userAgent.indexOf('Trident') !== -1;
+const isIE11 = typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Trident') !== -1;
+
+function shouldSkipProperty(global, p) {
+	if (
+		!global.hasOwnProperty(p) ||
+		!isNaN(p) && p < global.length
+	)
+		return true;
+
+	if (isIE11) {
+		// https://github.com/kuitos/import-html-entry/pull/32，最小化 try 范围
+		try {
+			return global[p] && global[p].parent === window;
+		} catch (err) {
+			return true
+		}
+	} else {
+		return false
+	}
+}
 
 // safari unpredictably lists some new globals first or second in object order
 let firstGlobalProp, secondGlobalProp, lastGlobalProp;
-export function getGlobalProp() {
+
+export function getGlobalProp(global) {
 	let cnt = 0;
 	let lastProp;
 	let hasIframe = false;
 
 	for (let p in global) {
-		// do not check frames cause it could be removed during import
-		if (
-			!global.hasOwnProperty(p) ||
-			(!isNaN(p) && p < global.length) ||
-			(isIE && global[p] && global[p].parent === window)
-		)
+		if (shouldSkipProperty(global, p))
 			continue;
 
 		// 遍历 iframe，检查 window 上的属性值是否是 iframe，是则跳过后面的 first 和 second 判断
@@ -37,21 +52,18 @@ export function getGlobalProp() {
 		cnt++;
 		lastProp = p;
 	}
+
 	if (lastProp !== lastGlobalProp)
 		return lastProp;
 }
 
-export function noteGlobalProps() {
+export function noteGlobalProps(global) {
 	// alternatively Object.keys(global).pop()
 	// but this may be faster (pending benchmarks)
 	firstGlobalProp = secondGlobalProp = undefined;
+
 	for (let p in global) {
-		// do not check frames cause it could be removed during import
-		if (
-			!global.hasOwnProperty(p) ||
-			(!isNaN(p) && p < global.length) ||
-			(isIE && global[p] && global[p].parent === window)
-		)
+		if (shouldSkipProperty(global, p))
 			continue;
 		if (!firstGlobalProp)
 			firstGlobalProp = p;
@@ -59,6 +71,7 @@ export function noteGlobalProps() {
 			secondGlobalProp = p;
 		lastGlobalProp = p;
 	}
+
 	return lastGlobalProp;
 }
 

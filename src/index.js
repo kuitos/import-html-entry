@@ -40,15 +40,23 @@ function getEmbedHTML(template, styles, opts = {}) {
 		});
 }
 
+function getExecutableScript(scriptText, proxy, strictGlobal) {
+	window.proxy = proxy;
+	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
+	return strictGlobal
+		? `;(function(window, self){with(window){;${scriptText}\n}}).bind(window.proxy)(window.proxy, window.proxy);`
+		: `;(function(window, self){;${scriptText}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
+}
+
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
-			if (styleLink.startsWith('<')) {
-				// if it is inline style
-				return getInlineCode(styleLink);
-			} else {
-				// external styles
-				return styleCache[styleLink] ||
+		if (styleLink.startsWith('<')) {
+			// if it is inline style
+			return getInlineCode(styleLink);
+		} else {
+			// external styles
+			return styleCache[styleLink] ||
 					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
 			}
 
@@ -96,12 +104,11 @@ const supportsUserTiming =
 	typeof performance.clearMeasures === 'function';
 
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
-	const { fetch = defaultFetch } = opts;
+	const { fetch = defaultFetch, strictGlobal = false } = opts;
 
 	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
 
-			window.proxy = proxy;
 			const geval = eval;
 
 			function exec(scriptSrc, inlineScript, resolve) {
@@ -114,17 +121,17 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				}
 
 				if (scriptSrc === entry) {
-					noteGlobalProps();
+					noteGlobalProps(strictGlobal ? proxy : window);
 
 					try {
 						// bind window.proxy to change `this` reference in script
-						geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
+						geval(getExecutableScript(inlineScript, proxy, strictGlobal));
 					} catch (e) {
 						console.error(`error occurs while executing the entry ${scriptSrc}`);
 						throw e;
 					}
 
-					const exports = proxy[getGlobalProp()] || {};
+					const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 					resolve(exports);
 
 				} else {
@@ -132,14 +139,15 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					if (typeof inlineScript === 'string') {
 						try {
 							// bind window.proxy to change `this` reference in script
-							geval(`;(function(window){;${inlineScript}\n}).bind(window.proxy)(window.proxy);`);
+							geval(getExecutableScript(inlineScript, proxy, strictGlobal));
 						} catch (e) {
 							console.error(`error occurs while executing ${scriptSrc}`);
 							throw e;
 						}
 					} else {
+						// external script marked with async
 						inlineScript.async && inlineScript?.content
-							.then(downloadedScriptText => geval(`;(function(window){;${downloadedScriptText}\n}).bind(window.proxy)(window.proxy);`))
+							.then(downloadedScriptText => geval(getExecutableScript(downloadedScriptText, proxy)))
 							.catch(e => {
 								console.error(`error occurs while executing async script ${scriptSrc?.src}`);
 								throw e;
@@ -200,11 +208,11 @@ export default function importHTML(url, opts = {}) {
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: proxy => {
+				execScripts: (proxy, strictGlobal) => {
 					if (!scripts.length) {
 						return Promise.resolve();
 					}
-					return execScripts(entry, scripts, proxy, { fetch });
+					return execScripts(entry, scripts, proxy, { fetch, strictGlobal });
 				},
 			}));
 		}));
@@ -233,11 +241,11 @@ export function importEntry(entry, opts = {}) {
 			assetPublicPath: getPublicPath('/'),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: proxy => {
+			execScripts: (proxy, strictGlobal) => {
 				if (!scripts.length) {
 					return Promise.resolve();
 				}
-				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch });
+				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch, strictGlobal });
 			},
 		}));
 

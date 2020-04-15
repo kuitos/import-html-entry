@@ -1,6 +1,6 @@
 {
   "name": "import-html-entry",
-  "version": "1.5.1",
+  "version": "1.6.0-2",
   "description": "import html and get the exports of entry",
   "main": "./lib/index.js",
   "module": "./esm/index.js",
@@ -21,7 +21,7 @@
     "build:esm": "rm -fr ./esm && babel ./src --out-dir ./esm --ignore 'src/**/__tests__/**/*.js'",
     "prepush": "npm run lint",
     "prepublishOnly": "npm run build",
-    "release": "np --no-cleanup --yolo --no-publish",
+    "release": "np --no-cleanup --yolo --no-publish --any-branch",
     "test": "jest --no-cache"
   },
   "repository": {
