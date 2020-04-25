@@ -1,4 +1,9 @@
-import processTpl, { genIgnoreAssetReplaceSymbol, genLinkReplaceSymbol, genScriptReplaceSymbol } from '../process-tpl';
+import processTpl, {
+	genIgnoreAssetReplaceSymbol,
+	genLinkReplaceSymbol,
+	genModuleScriptReplaceSymbol,
+	genScriptReplaceSymbol
+} from '../process-tpl';
 
 test('test process-tpl', () => {
 
@@ -31,11 +36,11 @@ test('test process-tpl', () => {
 		'  crossorigin="anonymous"' +
 		'></script>' +
 		'<script \n' +
-		'  src="/module-for-modern-browsers.js"\n' +
+		'  src="/main-es2015.js"\n' +
 		'  type="module"' +
 		'></script>' +
 		'<script \n' +
-		'  src="/no-module-for-legacy-browsers.js"\n' +
+		'  src="/main-es5.js"\n' +
 		'  nomodule' +
 		'></script>' +
 		'<script \n' +
@@ -74,7 +79,7 @@ test('test process-tpl', () => {
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
 		// Jest/jsdom doesn't support module scripts, so nomodule scripts will be imported in test cases.
 		// https://github.com/jsdom/jsdom/issues/2475
-		'http://kuitos.me/no-module-for-legacy-browsers.js',
+		'http://kuitos.me/main-es5.js',
 		{
 			async: true,
 			src: 'http://kuitos.me/test-async.js',
@@ -85,6 +90,7 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 
 	// preload 资源直接被 ignore
 	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') === -1).toBeTruthy();
@@ -92,6 +98,8 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) !== -1).toBeTruthy();
 	// prefetch 资源直接被 ignore
 	expect(template.indexOf('<link rel="prefetch" href="/a3-ie6-polyfill.js">') === -1).toBeTruthy();
+	// type="module" 资源被 ignore
+	expect(template.indexOf(genModuleScriptReplaceSymbol('/main-es2015.js', false)) === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn/');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
@@ -176,6 +184,14 @@ test('test resource with no quotation marks', () => {
 		'  src=https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js\n' +
 		'  crossorigin="anonymous"' +
 		'></script>' +
+		'<script \n' +
+		'  src=/main-es2015.js\n' +
+		'  type=module' +
+		'></script>' +
+		'<script \n' +
+		'  src=/main-es5.js\n' +
+		'  nomodule' +
+		'></script>' +
 		'<style>\n' +
 		'body {\n' +
 		'background-color: red;\n' +
@@ -205,17 +221,21 @@ test('test resource with no quotation marks', () => {
 		'<script \n data-test>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
+		'http://kuitos.me/main-es5.js',
 		'http://kuitos.me/umi.js',
 		'http://kuitos.me/comment.js']);
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 
 	// preload 资源直接被忽略
 	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') === -1).toBeTruthy();
 	// preload/prefetch 资源被 replace
 	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) !== -1).toBeTruthy();
 	expect(template.indexOf('<link rel="prefetch" href=http://kuitos.me/a3-ie6-polyfill.js>') === -1).toBeTruthy();
+	// type="module" 资源被 ignore
+	expect(template.indexOf(genModuleScriptReplaceSymbol('/main-es2015.js', false)) === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
@@ -253,6 +273,14 @@ test('test resource mixing quotation marks', () => {
 		'  src=https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js\n' +
 		'  crossorigin="anonymous"' +
 		'></script>' +
+		'<script \n' +
+		'  src=/main-es2015.js\n' +
+		'  type=\'module\'' +
+		'></script>' +
+		'<script \n' +
+		'  src=\'/main-es5.js\'\n' +
+		'  nomodule' +
+		'></script>' +
 		'<style>\n' +
 		'body {\n' +
 		'background-color: red;\n' +
@@ -282,17 +310,21 @@ test('test resource mixing quotation marks', () => {
 		'<script \n data-test>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
+		'http://kuitos.me/main-es5.js',
 		'http://kuitos.me/umi.js',
 		'http://kuitos.me/comment.js']);
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 
 	// preload/prefetch 资源直接被 ignore
 	expect(template.indexOf('<link rel="preload" href=//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js>') === -1).toBeTruthy();
 	// 相对路径的补全 host
 	expect(template.indexOf(genLinkReplaceSymbol('/a3-ie6-polyfill.js', true)) === -1).toBeFalsy();
 	expect(template.indexOf('<link rel="prefetch" href="/a3-ie6-polyfill.js">') === -1).toBeTruthy();
+	// type="module" 资源被 ignore
+	expect(template.indexOf(genModuleScriptReplaceSymbol('/main-es2015.js', false)) === -1).toBeTruthy();
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');

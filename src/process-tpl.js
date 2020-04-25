@@ -35,7 +35,7 @@ export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!
 export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
-export const genModuleScriptReplaceSymbol = (moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ignored by import-html-entry -->`;
+export const genModuleScriptReplaceSymbol = (scriptSrc, moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ${scriptSrc} ignored by import-html-entry -->`;
 
 /**
  * parse the script link from the template
@@ -105,13 +105,10 @@ export default function processTpl(tpl, baseURI) {
 		})
 		.replace(ALL_SCRIPT_REGEX, match => {
 			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
+			const moduleScriptIgnore =
+				(moduleSupport && !!match.match(SCRIPT_NO_MODULE_REGEX)) ||
+				(!moduleSupport && !!match.match(SCRIPT_MODULE_REGEX));
 			// in order to keep the exec order of all javascripts
-
-			if (moduleSupport && match.match(SCRIPT_NO_MODULE_REGEX)) {
-				return genModuleScriptReplaceSymbol(moduleSupport);
-			} else if (!moduleSupport && match.match(SCRIPT_MODULE_REGEX)) {
-				return genModuleScriptReplaceSymbol(moduleSupport)
-			}
 
 			// if it is a external script
 			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
@@ -139,6 +136,10 @@ export default function processTpl(tpl, baseURI) {
 					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
 				}
 
+				if (moduleScriptIgnore) {
+					return genModuleScriptReplaceSymbol(matchedScriptSrc || 'js file', moduleSupport);
+				}
+
 				if (matchedScriptSrc) {
 					const asyncScript = !!match.match(SCRIPT_ASYNC_REGEX);
 					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
@@ -150,6 +151,11 @@ export default function processTpl(tpl, baseURI) {
 				if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol('js file');
 				}
+
+				if (moduleScriptIgnore) {
+					return genModuleScriptReplaceSymbol('js file', moduleSupport);
+				}
+
 				// if it is an inline script
 				const code = getInlineCode(match);
 
