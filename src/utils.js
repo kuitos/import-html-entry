@@ -95,6 +95,12 @@ export function defaultGetPublicPath(url) {
 	}
 }
 
+// Detect whether browser supports `<script type=module>` or not
+export function isModuleScriptSupported() {
+	const s = document.createElement('script');
+	return 'noModule' in s;
+}
+
 // RIC and shim for browsers setTimeout() without it
 export const requestIdleCallback =
 	window.requestIdleCallback ||
