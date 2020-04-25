@@ -31,6 +31,14 @@ test('test process-tpl', () => {
 		'  crossorigin="anonymous"' +
 		'></script>' +
 		'<script \n' +
+		'  src="/module-for-modern-browsers.js"\n' +
+		'  type="module"' +
+		'></script>' +
+		'<script \n' +
+		'  src="/no-module-for-legacy-browsers.js"\n' +
+		'  nomodule' +
+		'></script>' +
+		'<script \n' +
 		'  src="/test-async.js"\n' +
 		'  async' +
 		'></script>' +
@@ -64,6 +72,9 @@ test('test process-tpl', () => {
 		'<script \n data-test>\n  window.routerBase = "/";\n</script>',
 		'//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js',
 		'https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js',
+		// Jest/jsdom doesn't support module scripts, so nomodule scripts will be imported in test cases.
+		// https://github.com/jsdom/jsdom/issues/2475
+		'http://kuitos.me/no-module-for-legacy-browsers.js',
 		{
 			async: true,
 			src: 'http://kuitos.me/test-async.js',

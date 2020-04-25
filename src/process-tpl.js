@@ -3,13 +3,15 @@
  * @homepage https://github.com/kuitos/
  * @since 2018-09-03 15:04
  */
-import { getInlineCode } from './utils';
+import { getInlineCode, isModuleScriptSupported } from './utils';
 
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const SCRIPT_ASYNC_REGEX = /.*\sasync\s*.*/;
+const SCRIPT_NO_MODULE_REGEX = /.*\snomodule\s*.*/;
+const SCRIPT_MODULE_REGEX = /.*\stype=('|")?module('|")?\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
 const LINK_PRELOAD_OR_PREFETCH_REGEX = /\srel=('|")?(preload|prefetch)\1/;
@@ -33,6 +35,7 @@ export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!
 export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
+export const genModuleScriptReplaceSymbol = (moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ignored by import-html-entry -->`;
 
 /**
  * parse the script link from the template
@@ -50,6 +53,7 @@ export default function processTpl(tpl, baseURI) {
 	let scripts = [];
 	const styles = [];
 	let entry = null;
+	const moduleSupport = isModuleScriptSupported();
 
 	const template = tpl
 
@@ -102,6 +106,12 @@ export default function processTpl(tpl, baseURI) {
 		.replace(ALL_SCRIPT_REGEX, match => {
 			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
 			// in order to keep the exec order of all javascripts
+
+			if (moduleSupport && match.match(SCRIPT_NO_MODULE_REGEX)) {
+				return genModuleScriptReplaceSymbol(moduleSupport);
+			} else if (!moduleSupport && match.match(SCRIPT_MODULE_REGEX)) {
+				return genModuleScriptReplaceSymbol(moduleSupport)
+			}
 
 			// if it is a external script
 			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
