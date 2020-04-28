@@ -40,12 +40,12 @@ function getEmbedHTML(template, styles, opts = {}) {
 		});
 }
 
-function getExecutableScript(scriptText, proxy, strictGlobal) {
+function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
 	window.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
-		? `;(function(window, self){with(window){;${scriptText}\n}}).bind(window.proxy)(window.proxy, window.proxy);`
-		: `;(function(window, self){;${scriptText}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
+		? `;(function(window, self){with(window){;${scriptText}\n//# sourceURL=${scriptSrc}\n}}).bind(window.proxy)(window.proxy, window.proxy);`
+		: `;(function(window, self){;${scriptText}\n//# sourceURL=${scriptSrc}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
 }
 
 // for prefetch
@@ -85,6 +85,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 				const { src, async } = script;
 				if (async) {
 					return {
+						src,
 						async: true,
 						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src).then(resolve, reject))),
 					};
@@ -123,13 +124,8 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				if (scriptSrc === entry) {
 					noteGlobalProps(strictGlobal ? proxy : window);
 
-					try {
-						// bind window.proxy to change `this` reference in script
-						geval(getExecutableScript(inlineScript, proxy, strictGlobal));
-					} catch (e) {
-						console.error(`error occurs while executing the entry ${scriptSrc}`);
-						throw e;
-					}
+					// bind window.proxy to change `this` reference in script
+					geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
 
 					const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 					resolve(exports);
@@ -137,19 +133,14 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				} else {
 
 					if (typeof inlineScript === 'string') {
-						try {
-							// bind window.proxy to change `this` reference in script
-							geval(getExecutableScript(inlineScript, proxy, strictGlobal));
-						} catch (e) {
-							console.error(`error occurs while executing ${scriptSrc}`);
-							throw e;
-						}
+						// bind window.proxy to change `this` reference in script
+						geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
 					} else {
 						// external script marked with async
 						inlineScript.async && inlineScript?.content
-							.then(downloadedScriptText => geval(getExecutableScript(downloadedScriptText, proxy)))
+							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
 							.catch(e => {
-								console.error(`error occurs while executing async script ${scriptSrc?.src}`);
+								console.error(`error occurs while executing async script ${inlineScript.src}`);
 								throw e;
 							});
 					}
