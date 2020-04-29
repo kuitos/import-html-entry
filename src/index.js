@@ -40,23 +40,27 @@ function getEmbedHTML(template, styles, opts = {}) {
 		});
 }
 
+const isInlineCode = code => code.startsWith('<');
+
 function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
+	const sourceUrl = isInlineCode(scriptSrc) ? '' : `//# sourceURL=${scriptSrc}\n`;
+
 	window.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
-		? `;(function(window, self){with(window){;${scriptText}\n//# sourceURL=${scriptSrc}\n}}).bind(window.proxy)(window.proxy, window.proxy);`
-		: `;(function(window, self){;${scriptText}\n//# sourceURL=${scriptSrc}\n}).bind(window.proxy)(window.proxy, window.proxy);`;
+		? `;(function(window, self){with(window){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy);`
+		: `;(function(window, self){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy);`;
 }
 
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 	return Promise.all(styles.map(styleLink => {
-		if (styleLink.startsWith('<')) {
-			// if it is inline style
-			return getInlineCode(styleLink);
-		} else {
-			// external styles
-			return styleCache[styleLink] ||
+			if (isInlineCode(styleLink)) {
+				// if it is inline style
+				return getInlineCode(styleLink);
+			} else {
+				// external styles
+				return styleCache[styleLink] ||
 					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
 			}
 
@@ -73,7 +77,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 	return Promise.all(scripts.map(script => {
 
 			if (typeof script === 'string') {
-				if (script.startsWith('<')) {
+				if (isInlineCode(script)) {
 					// if it is inline script
 					return getInlineCode(script);
 				} else {
