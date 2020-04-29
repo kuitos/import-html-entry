@@ -48,7 +48,7 @@ function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
 	window.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
-		? `;(function(window, self){with(window){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy);`
+		? `;(function(window, self){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy);`
 		: `;(function(window, self){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy);`;
 }
 
