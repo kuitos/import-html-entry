@@ -4,7 +4,7 @@
  * @since 2018-08-15 11:37
  */
 
-import processTpl, { genLinkReplaceSymbol } from './process-tpl';
+import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
 import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
 
 const styleCache = {};
@@ -230,8 +230,10 @@ export function importEntry(entry, opts = {}) {
 	if (Array.isArray(entry.scripts) || Array.isArray(entry.styles)) {
 
 		const { scripts = [], styles = [], html = '' } = entry;
+		const setStylePlaceholder2HTML = tpl => styles.reduceRight((html, styleSrc) => `${genLinkReplaceSymbol(styleSrc)}${html}`, tpl);
+		const setScriptPlaceholder2HTML = tpl => scripts.reduce((html, scriptSrc) => `${html}${genScriptReplaceSymbol(scriptSrc)}`, tpl);
 
-		return getEmbedHTML(getTemplate(html), styles, { fetch }).then(embedHTML => ({
+		return getEmbedHTML(getTemplate(setScriptPlaceholder2HTML(setStylePlaceholder2HTML(html))), styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
 			assetPublicPath: getPublicPath('/'),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
