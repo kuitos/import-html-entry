@@ -16,6 +16,7 @@ const LINK_TAG_REGEX = /<(link)\s+.*?>/gi;
 const LINK_IGNORE_REGEX = /.*ignore\s*.*/;
 const LINK_PRELOAD_OR_PREFETCH_REGEX = /\srel=('|")?(preload|prefetch)\1/;
 const LINK_HREF_REGEX = /.*\shref=('|")?([^>'"\s]+)/;
+const LINK_AS_FONT = /.*\sas=('|")?font\1.*/;
 const STYLE_TAG_REGEX = /<style[^>]*>[\s\S]*?<\/style>/gi;
 const STYLE_TYPE_REGEX = /\s+rel=('|")?stylesheet\1.*/;
 const STYLE_HREF_REGEX = /.*\shref=('|")?([^>'"\s]+)/;
@@ -88,7 +89,13 @@ export default function processTpl(tpl, baseURI) {
 					return genLinkReplaceSymbol(newHref);
 				}
 			}
-
+			/*
+			as font normal
+			*/
+			const asFont = !!match.match(LINK_AS_FONT);
+			if (asFont) {
+				return match;
+			}
 			const preloadOrPrefetchType = match.match(LINK_PRELOAD_OR_PREFETCH_REGEX) && match.match(LINK_HREF_REGEX);
 			if (preloadOrPrefetchType) {
 				const [, , linkHref] = match.match(LINK_HREF_REGEX);
