@@ -5,24 +5,6 @@ import processTpl, {
 	genScriptReplaceSymbol
 } from '../process-tpl';
 
-test('test link as font', () => {
-	const tpl = '<!DOCTYPE html><html><head>\n' +
-		'\n' +
-		'<link rel="shortcut icon" href="https://t.alipayobjects.com/images/rmsweb/T1pqpiXfJgXXXXXXXX.png" type="image/x-icon">\n' +
-		'<link rel="preload" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous" as="font">\n' +
-		'<link rel="stylesheet" href="/umi.css">\n' +
-		'<meta charset="utf-8">\n' +
-		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
-		'<title>&#x91D1;&#x878D;&#x4E91;&#x63A7;&#x5236;&#x53F0;</title>\n' +
-		'</head>\n' +
-		'<body>\n' +
-		'<div id="root"></div>\n' +
-		'</body></html>';
-
-	const { template } = processTpl(tpl, 'http://kuitos.me/cdn/');
-	console.log(template)
-});
-
 test('test process-tpl', () => {
 
 	const tpl = '<!DOCTYPE html><html><head>\n' +
@@ -31,6 +13,7 @@ test('test process-tpl', () => {
 		'<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">\n' +
 		'<link rel="prefetch" href="/a3-ie6-polyfill.js">\n' +
 		'<link rel="stylesheet" href="/umi.css">\n' +
+		'<link rel="preload" as="font" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous">\n' +
 		'\n' +
 		'<meta charset="utf-8">\n' +
 		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
