@@ -93,6 +93,8 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 
+	// link as font 资源直接被 ignore
+	expect(template.indexOf('<link rel="preload" as="font" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous">') !== -1).toBeTruthy();
 	// preload 资源直接被 ignore
 	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') === -1).toBeTruthy();
 	// prefetch/preload 会被 replace

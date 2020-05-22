@@ -90,7 +90,7 @@ export default function processTpl(tpl, baseURI) {
 				}
 			}
 
-			const preloadOrPrefetchType = match.match(LINK_PRELOAD_OR_PREFETCH_REGEX) && match.match(LINK_HREF_REGEX) && !!match.match(LINK_AS_FONT);
+			const preloadOrPrefetchType = match.match(LINK_PRELOAD_OR_PREFETCH_REGEX) && match.match(LINK_HREF_REGEX) && !match.match(LINK_AS_FONT);
 			if (preloadOrPrefetchType) {
 				const [, , linkHref] = match.match(LINK_HREF_REGEX);
 				return genLinkReplaceSymbol(linkHref, true);
