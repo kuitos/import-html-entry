@@ -43,6 +43,8 @@ test('test process-tpl', () => {
 		'  src="/main-es5.js"\n' +
 		'  nomodule' +
 		'></script>' +
+		'<script src="/test-type.json" type="test"></script>' +
+		'<script type=systemjs-importmap >{"a": 1}</script>' +
 		'<script \n' +
 		'  src="/test-async.js"\n' +
 		'  async' +
@@ -91,6 +93,8 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
+	expect(template.indexOf('<script src="http://kuitos.me/test-type.json" type="test"></script>') !== -1).toBeTruthy();
+	expect(template.indexOf('<script type=systemjs-importmap >{"a": 1}</script>') !== -1).toBeTruthy();
 
 	// preload 资源直接被 ignore
 	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') === -1).toBeTruthy();
