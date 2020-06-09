@@ -32,10 +32,10 @@ function getEntirePath(path, baseURI) {
 	return new URL(path, baseURI).toString();
 }
 
-function isIgnoreType(type) {
+function isNotHandleType(type) {
   if(type === null) type = 'text/javascript';
-  const notIgnoreTypes = ['text/javascript','module','nomodule','application/javascript'];
-  return !notIgnoreTypes.includes(type.toLowerCase());
+  const handleTypes = ['text/javascript','module','nomodule','application/javascript'];
+  return !handleTypes.includes(type.toLowerCase());
 }
 
 export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
@@ -119,7 +119,7 @@ export default function processTpl(tpl, baseURI) {
 
 			const matchedScriptTypeMatch = match.match(SCRIPT_TYPE_REGEX);
 			const matchedScriptType = matchedScriptTypeMatch && matchedScriptTypeMatch[2];
-			const isIgnoreScript = isIgnoreType(matchedScriptType);
+			const isNotHandleScript = isNotHandleType(matchedScriptType);
 
 			// if it is a external script
 			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
@@ -144,7 +144,7 @@ export default function processTpl(tpl, baseURI) {
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
 				}
 
-				if(isIgnoreScript){
+				if(isNotHandleScript){
 					return match.replace(initMatchedScriptSrc,matchedScriptSrc)
 				}
 
@@ -164,7 +164,7 @@ export default function processTpl(tpl, baseURI) {
 
 				return match;
 			} else {
-        if(isIgnoreScript){
+        if(isNotHandleScript){
 					return match;
 				}
 
