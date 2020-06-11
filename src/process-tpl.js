@@ -164,7 +164,7 @@ export default function processTpl(tpl, baseURI) {
 
 				return match;
 			} else {
-        		if(isNotHandleScript){
+				if(isNotHandleScript){
 					return match;
 				}
 
