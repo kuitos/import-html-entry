@@ -13,6 +13,7 @@ test('test process-tpl', () => {
 		'<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">\n' +
 		'<link rel="prefetch" href="/a3-ie6-polyfill.js">\n' +
 		'<link rel="stylesheet" href="/umi.css">\n' +
+		'<link rel="preload" as="font" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous">\n' +
 		'\n' +
 		'<meta charset="utf-8">\n' +
 		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
@@ -92,6 +93,8 @@ test('test process-tpl', () => {
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 
+	// link as font 资源直接被 ignore
+	expect(template.indexOf('<link rel="preload" as="font" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous">') !== -1).toBeTruthy();
 	// preload 资源直接被 ignore
 	expect(template.indexOf('<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">') === -1).toBeTruthy();
 	// prefetch/preload 会被 replace
