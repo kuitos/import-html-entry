@@ -34,7 +34,7 @@ function getEntirePath(path, baseURI) {
 
 function isNotHandleType(type) {
   if(type === null) type = 'text/javascript';
-  const handleTypes = ['text/javascript','module','nomodule','application/javascript'];
+  const handleTypes = ['text/javascript','module','application/javascript','text/ecmascript','application/ecmascript'];
   return !handleTypes.includes(type.toLowerCase());
 }
 
@@ -164,7 +164,7 @@ export default function processTpl(tpl, baseURI) {
 
 				return match;
 			} else {
-        if(isNotHandleScript){
+        		if(isNotHandleScript){
 					return match;
 				}
 
