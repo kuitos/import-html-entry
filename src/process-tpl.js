@@ -8,6 +8,7 @@ import { getInlineCode, isModuleScriptSupported } from './utils';
 const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
+const SCRIPT_TYPE_REGEX = /.*\stype=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const SCRIPT_ASYNC_REGEX = /.*\sasync\s*.*/;
 const SCRIPT_NO_MODULE_REGEX = /.*\snomodule\s*.*/;
@@ -30,6 +31,12 @@ function hasProtocol(url) {
 
 function getEntirePath(path, baseURI) {
 	return new URL(path, baseURI).toString();
+}
+
+function isNotHandleType(type) {
+  if(type === null) type = 'text/javascript';
+  const handleTypes = ['text/javascript','module','application/javascript','text/ecmascript','application/ecmascript'];
+  return !handleTypes.includes(type.toLowerCase());
 }
 
 export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
@@ -111,6 +118,10 @@ export default function processTpl(tpl, baseURI) {
 				(!moduleSupport && !!match.match(SCRIPT_MODULE_REGEX));
 			// in order to keep the exec order of all javascripts
 
+			const matchedScriptTypeMatch = match.match(SCRIPT_TYPE_REGEX);
+			const matchedScriptType = matchedScriptTypeMatch && matchedScriptTypeMatch[2];
+			const isNotHandleScript = isNotHandleType(matchedScriptType);
+
 			// if it is a external script
 			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
 				/*
@@ -119,7 +130,8 @@ export default function processTpl(tpl, baseURI) {
 
 				const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
 				const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
-				let matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
+				const initMatchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
+				let matchedScriptSrc = initMatchedScriptSrc;
 
 				if (entry && matchedScriptEntry) {
 					throw new SyntaxError('You should not set multiply entry script!');
@@ -131,6 +143,10 @@ export default function processTpl(tpl, baseURI) {
 					}
 
 					entry = entry || matchedScriptEntry && matchedScriptSrc;
+				}
+
+				if(isNotHandleScript){
+					return match.replace(initMatchedScriptSrc,matchedScriptSrc)
 				}
 
 				if (scriptIgnore) {
@@ -149,6 +165,10 @@ export default function processTpl(tpl, baseURI) {
 
 				return match;
 			} else {
+				if(isNotHandleScript){
+					return match;
+				}
+
 				if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol('js file');
 				}
