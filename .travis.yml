@@ -8,6 +8,8 @@ cache:
     - node_modules
 script:
   - yarn lint
+after_success:
+  - yarn codecov
 
 before_deploy: |
   function npm_dist_tag() {
