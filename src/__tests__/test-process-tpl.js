@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import processTpl, {
 	genIgnoreAssetReplaceSymbol,
 	genLinkReplaceSymbol,
@@ -115,37 +116,7 @@ test('test process-tpl', () => {
 });
 
 test('test ignore js or css', () => {
-	const tpl = '<!DOCTYPE html><html><head>\n' +
-		'\n' +
-		'<link rel="shortcut icon" href="https://t.alipayobjects.com/images/rmsweb/T1pqpiXfJgXXXXXXXX.png" type="image/x-icon">\n' +
-		'<link ignore rel="stylesheet" href="/umi.css">\n' +
-		'\n' +
-		'<meta charset="utf-8">\n' +
-		'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">\n' +
-		'<title>&#x91D1;&#x878D;&#x4E91;&#x63A7;&#x5236;&#x53F0;</title>\n' +
-		'<style ignore>body {color: red}</style>\n' +
-		'<style ignore>\n' +
-		'	body {\n' +
-		'		color: red\n' +
-		'	}\n' +
-		'</style>\n' +
-		'<script' +
-		'  src="https://gw.alipayobjects.com/os/lib/react/16.8.6/umd/react.production.min.js"\n' +
-		'  crossorigin="anonymous"' +
-		'></script>' +
-		'<script src="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js"></script>\n' +
-		'</head>\n' +
-		'<body>\n' +
-		'\n' +
-		'<div id="root"></div>\n' +
-		'\n' +
-		'<script ignore src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>\n' +
-		'<script src="./app.js"></script>\n' +
-		'<script ignore>alert(1)</script>\n' +
-		'<script ignore src="/polyfill.js"></script>\n' +
-		'\n' +
-		'\n' +
-		'</body></html>';
+	const tpl = readFileSync(require.resolve('./fixtures/ignore-js-css.html'), { encoding: 'utf-8' });
 
 	const { entry, template } = processTpl(tpl, 'http://kuitos.me/cdn/');
 	expect(entry).toBe('http://kuitos.me/cdn/app.js');
