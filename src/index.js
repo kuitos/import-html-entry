@@ -72,7 +72,15 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 export function getExternalScripts(scripts, fetch = defaultFetch) {
 
 	const fetchScript = scriptUrl => scriptCache[scriptUrl] ||
-		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => response.text()));
+		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => {
+			// usually browser treats 4xx and 5xx response of script loading as an error and will fire a script error event
+			// https://stackoverflow.com/questions/5625420/what-http-headers-responses-trigger-the-onerror-handler-on-a-script-tag/5625603
+			if (response.status >= 400) {
+				throw new Error(`${scriptUrl} load failed with status ${response.status}`);
+			}
+
+			return response.text();
+		}));
 
 	return Promise.all(scripts.map(script => {
 
@@ -99,6 +107,13 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 			}
 		},
 	));
+}
+
+function throwNonBlockingError(error, msg) {
+	setTimeout(() => {
+		console.error(msg);
+		throw error;
+	});
 }
 
 const supportsUserTiming =
@@ -128,23 +143,30 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				if (scriptSrc === entry) {
 					noteGlobalProps(strictGlobal ? proxy : window);
 
-					// bind window.proxy to change `this` reference in script
-					geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
-
-					const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
-					resolve(exports);
-
-				} else {
-
-					if (typeof inlineScript === 'string') {
+					try {
 						// bind window.proxy to change `this` reference in script
 						geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
+						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
+						resolve(exports);
+					} catch (e) {
+						// consistent with browser behavior, any independent script evaluation error should not block the others
+						throwNonBlockingError(e, `[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
+					}
+				} else {
+					if (typeof inlineScript === 'string') {
+						try {
+							// bind window.proxy to change `this` reference in script
+							geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
+						} catch (e) {
+							// consistent with browser behavior, any independent script evaluation error should not block the others
+							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing normal script ${scriptSrc}`);
+						}
 					} else {
 						// external script marked with async
 						inlineScript.async && inlineScript?.content
 							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
 							.catch(e => {
-								console.error(`error occurs while executing async script ${inlineScript.src}`);
+								console.error(`[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
 								throw e;
 							});
 					}
