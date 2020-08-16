@@ -69,13 +69,15 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 }
 
 // for prefetch
-export function getExternalScripts(scripts, fetch = defaultFetch) {
+export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback = () => {
+}) {
 
 	const fetchScript = scriptUrl => scriptCache[scriptUrl] ||
 		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => {
 			// usually browser treats 4xx and 5xx response of script loading as an error and will fire a script error event
 			// https://stackoverflow.com/questions/5625420/what-http-headers-responses-trigger-the-onerror-handler-on-a-script-tag/5625603
 			if (response.status >= 400) {
+				errorCallback();
 				throw new Error(`${scriptUrl} load failed with status ${response.status}`);
 			}
 
@@ -137,7 +139,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		},
 	} = opts;
 
-	return getExternalScripts(scripts, fetch)
+	return getExternalScripts(scripts, fetch, error)
 		.then(scriptsText => {
 
 			const geval = eval;
@@ -160,7 +162,6 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 						resolve(exports);
 					} catch (e) {
-						error(e);
 						// consistent with browser behavior, any independent script evaluation error should not block the others
 						throwNonBlockingError(e, `[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
 					}
@@ -170,7 +171,6 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 							// bind window.proxy to change `this` reference in script
 							geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
 						} catch (e) {
-							error(e);
 							// consistent with browser behavior, any independent script evaluation error should not block the others
 							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing normal script ${scriptSrc}`);
 						}
@@ -179,7 +179,6 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						inlineScript.async && inlineScript?.content
 							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
 							.catch(e => {
-								error(e);
 								console.error(`[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
 								throw e;
 							});
