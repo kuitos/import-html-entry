@@ -23,6 +23,8 @@ export type ImportEntryOpts = {
 
 type ExecScriptsOpts = Pick<ImportEntryOpts, 'fetch'> & {
 	strictGlobal?: boolean;
+	success: CallableFunction;
+	error: (error: Error) => void;
 }
 
 export type Entry = string | { styles?: string[], scripts?: string[], html?: string };
