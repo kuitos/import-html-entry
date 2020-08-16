@@ -123,8 +123,19 @@ const supportsUserTiming =
 	typeof performance.measure === 'function' &&
 	typeof performance.clearMeasures === 'function';
 
+/**
+ * FIXME to consistent with browser behavior, we should only provide callback way to invoke success and error event
+ * @param entry
+ * @param scripts
+ * @param proxy
+ * @param opts
+ * @returns {Promise<unknown>}
+ */
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
-	const { fetch = defaultFetch, strictGlobal = false } = opts;
+	const {
+		fetch = defaultFetch, strictGlobal = false, success, error = () => {
+		},
+	} = opts;
 
 	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
@@ -149,6 +160,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 						resolve(exports);
 					} catch (e) {
+						error(e);
 						// consistent with browser behavior, any independent script evaluation error should not block the others
 						throwNonBlockingError(e, `[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
 					}
@@ -158,6 +170,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 							// bind window.proxy to change `this` reference in script
 							geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
 						} catch (e) {
+							error(e);
 							// consistent with browser behavior, any independent script evaluation error should not block the others
 							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing normal script ${scriptSrc}`);
 						}
@@ -166,6 +179,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						inlineScript.async && inlineScript?.content
 							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
 							.catch(e => {
+								error(e);
 								console.error(`[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
 								throw e;
 							});
@@ -195,7 +209,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				}
 			}
 
-			return new Promise(resolve => schedule(0, resolve));
+			return new Promise(resolve => schedule(0, success || resolve));
 		});
 }
 
