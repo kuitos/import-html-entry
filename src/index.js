@@ -270,7 +270,7 @@ export function importEntry(entry, opts = {}) {
 
 		return getEmbedHTML(getTemplate(setScriptPlaceholder2HTML(setStylePlaceholder2HTML(html))), styles, { fetch }).then(embedHTML => ({
 			template: embedHTML,
-			assetPublicPath: getPublicPath('/'),
+			assetPublicPath: getPublicPath(entry),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 			execScripts: (proxy, strictGlobal) => {
