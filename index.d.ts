@@ -17,7 +17,7 @@ interface IImportResult {
 
 export type ImportEntryOpts = {
 	fetch?: typeof window.fetch;
-	getPublicPath?: (rawPublicPath: string, configEntry?: object) => string;
+	getPublicPath?: (entry: Entry) => string;
 	getTemplate?: (tpl: string) => string;
 }
 
