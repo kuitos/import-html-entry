@@ -136,13 +136,17 @@ const supportsUserTiming =
 export function execScripts(entry, scripts, proxy = window, opts = {}) {
 	const {
 		fetch = defaultFetch, strictGlobal = false, success, error = () => {
+		}, beforeExec = () => {
 		},
 	} = opts;
 
 	return getExternalScripts(scripts, fetch, error)
 		.then(scriptsText => {
 
-			const geval = eval;
+			const geval = (code) => {
+				beforeExec();
+				(0, eval)(code);
+			};
 
 			function exec(scriptSrc, inlineScript, resolve) {
 
