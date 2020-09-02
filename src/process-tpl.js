@@ -5,7 +5,7 @@
  */
 import { getInlineCode, isModuleScriptSupported } from './utils';
 
-const ALL_SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+const ALL_SCRIPT_REGEX = /(<script[\s\S]*?>)[\s\S]*?<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_TYPE_REGEX = /.*\stype=('|")?([^>'"\s]+)/;
@@ -110,27 +110,27 @@ export default function processTpl(tpl, baseURI) {
 			}
 			return match;
 		})
-		.replace(ALL_SCRIPT_REGEX, match => {
-			const scriptIgnore = match.match(SCRIPT_IGNORE_REGEX);
+		.replace(ALL_SCRIPT_REGEX, (match, scriptTag) => {
+			const scriptIgnore = scriptTag.match(SCRIPT_IGNORE_REGEX);
 			const moduleScriptIgnore =
-				(moduleSupport && !!match.match(SCRIPT_NO_MODULE_REGEX)) ||
-				(!moduleSupport && !!match.match(SCRIPT_MODULE_REGEX));
+				(moduleSupport && !!scriptTag.match(SCRIPT_NO_MODULE_REGEX)) ||
+				(!moduleSupport && !!scriptTag.match(SCRIPT_MODULE_REGEX));
 			// in order to keep the exec order of all javascripts
 
-			const matchedScriptTypeMatch = match.match(SCRIPT_TYPE_REGEX);
+			const matchedScriptTypeMatch = scriptTag.match(SCRIPT_TYPE_REGEX);
 			const matchedScriptType = matchedScriptTypeMatch && matchedScriptTypeMatch[2];
 			if (!isValidJavaScriptType(matchedScriptType)) {
 				return match;
 			}
 
 			// if it is a external script
-			if (SCRIPT_TAG_REGEX.test(match) && match.match(SCRIPT_SRC_REGEX)) {
+			if (SCRIPT_TAG_REGEX.test(match) && scriptTag.match(SCRIPT_SRC_REGEX)) {
 				/*
 				collect scripts and replace the ref
 				*/
 
-				const matchedScriptEntry = match.match(SCRIPT_ENTRY_REGEX);
-				const matchedScriptSrcMatch = match.match(SCRIPT_SRC_REGEX);
+				const matchedScriptEntry = scriptTag.match(SCRIPT_ENTRY_REGEX);
+				const matchedScriptSrcMatch = scriptTag.match(SCRIPT_SRC_REGEX);
 				let matchedScriptSrc = matchedScriptSrcMatch && matchedScriptSrcMatch[2];
 
 				if (entry && matchedScriptEntry) {
@@ -154,7 +154,7 @@ export default function processTpl(tpl, baseURI) {
 				}
 
 				if (matchedScriptSrc) {
-					const asyncScript = !!match.match(SCRIPT_ASYNC_REGEX);
+					const asyncScript = !!scriptTag.match(SCRIPT_ASYNC_REGEX);
 					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
 					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
 				}
