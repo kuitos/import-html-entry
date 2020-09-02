@@ -309,3 +309,12 @@ test('test resource mixing quotation marks', () => {
 	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });
+
+test('should work with huge html content', () => {
+	const hugeHtmlContent = readFileSync(require.resolve('./fixtures/huge-content.html'), 'utf-8');
+
+	const start = Date.now();
+	processTpl(hugeHtmlContent, '//test.com');
+	const during = Date.now() - start;
+	expect(during < 1000).toBeTruthy();
+});
