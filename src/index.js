@@ -166,8 +166,9 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 						resolve(exports);
 					} catch (e) {
-						// consistent with browser behavior, any independent script evaluation error should not block the others
-						throwNonBlockingError(e, `[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
+						// entry error must be thrown to make the promise settled
+						console.error(`[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
+						throw e;
 					}
 				} else {
 					if (typeof inlineScript === 'string') {
@@ -183,8 +184,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 						inlineScript.async && inlineScript?.content
 							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
 							.catch(e => {
-								console.error(`[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
-								throw e;
+								throwNonBlockingError(e, `[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
 							});
 					}
 				}
