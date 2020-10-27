@@ -1,6 +1,6 @@
 {
   "name": "import-html-entry",
-  "version": "1.9.3",
+  "version": "1.10.0",
   "description": "import html and get the exports of entry",
   "main": "./lib/index.js",
   "module": "./esm/index.js",
