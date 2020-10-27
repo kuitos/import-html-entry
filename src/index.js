@@ -148,8 +148,8 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		.then(scriptsText => {
 
 			const geval = (scriptSrc, inlineScript) => {
-				let code = beforeExec(inlineScript, scriptSrc) || inlineScript;
-				code = getExecutableScript(scriptSrc, code, proxy, strictGlobal);
+				const rawCode = beforeExec(inlineScript, scriptSrc) || inlineScript;
+				const code = getExecutableScript(scriptSrc, rawCode, proxy, strictGlobal);
 
 				(0, eval)(code);
 
