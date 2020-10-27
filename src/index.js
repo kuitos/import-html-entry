@@ -140,15 +140,20 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 	const {
 		fetch = defaultFetch, strictGlobal = false, success, error = () => {
 		}, beforeExec = () => {
+		}, afterExec = () => {
 		},
 	} = opts;
 
 	return getExternalScripts(scripts, fetch, error)
 		.then(scriptsText => {
 
-			const geval = (code) => {
-				beforeExec();
+			const geval = (scriptSrc, inlineScript) => {
+				const rawCode = beforeExec(inlineScript, scriptSrc) || inlineScript;
+				const code = getExecutableScript(scriptSrc, rawCode, proxy, strictGlobal);
+
 				(0, eval)(code);
+
+				afterExec(inlineScript, scriptSrc);
 			};
 
 			function exec(scriptSrc, inlineScript, resolve) {
@@ -165,7 +170,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 					try {
 						// bind window.proxy to change `this` reference in script
-						geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
+						geval(scriptSrc, inlineScript);
 						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 						resolve(exports);
 					} catch (e) {
@@ -177,7 +182,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					if (typeof inlineScript === 'string') {
 						try {
 							// bind window.proxy to change `this` reference in script
-							geval(getExecutableScript(scriptSrc, inlineScript, proxy, strictGlobal));
+							geval(scriptSrc, inlineScript);
 						} catch (e) {
 							// consistent with browser behavior, any independent script evaluation error should not block the others
 							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing normal script ${scriptSrc}`);
@@ -185,7 +190,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					} else {
 						// external script marked with async
 						inlineScript.async && inlineScript?.content
-							.then(downloadedScriptText => geval(getExecutableScript(inlineScript.src, downloadedScriptText, proxy, strictGlobal)))
+							.then(downloadedScriptText => geval(inlineScript.src, downloadedScriptText))
 							.catch(e => {
 								throwNonBlockingError(e, `[import-html-entry]: error occurs while executing async script ${inlineScript.src}`);
 							});
@@ -245,11 +250,16 @@ export default function importHTML(url, opts = {}) {
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: (proxy, strictGlobal) => {
+				execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
 					if (!scripts.length) {
 						return Promise.resolve();
 					}
-					return execScripts(entry, scripts, proxy, { fetch, strictGlobal });
+					return execScripts(entry, scripts, proxy, {
+						fetch,
+						strictGlobal,
+						beforeExec: execScriptsHooks.beforeExec,
+						afterExec: execScriptsHooks.afterExec,
+					});
 				},
 			}));
 		}));
@@ -265,7 +275,11 @@ export function importEntry(entry, opts = {}) {
 
 	// html entry
 	if (typeof entry === 'string') {
-		return importHTML(entry, { fetch, getPublicPath, getTemplate });
+		return importHTML(entry, {
+			fetch,
+			getPublicPath,
+			getTemplate,
+		});
 	}
 
 	// config entry
@@ -280,11 +294,16 @@ export function importEntry(entry, opts = {}) {
 			assetPublicPath: getPublicPath(entry),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: (proxy, strictGlobal) => {
+			execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
 				if (!scripts.length) {
 					return Promise.resolve();
 				}
-				return execScripts(scripts[scripts.length - 1], scripts, proxy, { fetch, strictGlobal });
+				return execScripts(scripts[scripts.length - 1], scripts, proxy, {
+					fetch,
+					strictGlobal,
+					beforeExec: execScriptsHooks.beforeExec,
+					afterExec: execScriptsHooks.afterExec,
+				});
 			},
 		}));
 
