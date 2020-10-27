@@ -162,17 +162,18 @@ describe('execScripts', () => {
 				'./dummy.html',
 				{
 					fetch,
-					beforeExec(code, scriptSource) {
-						expect(code).toBe(expectCode);
-						expect(scriptSource).toBe(script);
-
-						return 'console.log("updated")';
-					},
-					afterExec: afterExecHook,
 				}
 			);
 
-			await result.execScripts(dummyContext, true);
+			await result.execScripts(dummyContext, true, {
+				beforeExec(code, scriptSource) {
+					expect(code).toBe(expectCode);
+					expect(scriptSource).toBe(script);
+
+					return 'console.log("updated")';
+				},
+				afterExec: afterExecHook,
+			});
 
 			// assert
 			expect(spyInstance).toHaveBeenCalledTimes(1);
@@ -209,17 +210,18 @@ describe('execScripts', () => {
 				},
 				{
 					fetch,
-					beforeExec(code, scriptSource) {
-						expect(code).toBe(expectCode);
-						expect(scriptSource).toBe(script);
-
-						return 'console.log(this.hello, window.hello, "updated")';
-					},
-					afterExec: afterExecHook,
 				}
 			);
 
-			await result.execScripts(dummyContext, true);
+			await result.execScripts(dummyContext, true, {
+				beforeExec(code, scriptSource) {
+					expect(code).toBe(expectCode);
+					expect(scriptSource).toBe(script);
+
+					return 'console.log(this.hello, window.hello, "updated")';
+				},
+				afterExec: afterExecHook,
+			});
 
 			// assert
 			expect(spyInstance).toHaveBeenCalledTimes(1);

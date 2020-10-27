@@ -250,15 +250,15 @@ export default function importHTML(url, opts = {}) {
 				assetPublicPath,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-				execScripts: (proxy, strictGlobal) => {
+				execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
 					if (!scripts.length) {
 						return Promise.resolve();
 					}
 					return execScripts(entry, scripts, proxy, {
 						fetch,
 						strictGlobal,
-						beforeExec: opts.beforeExec,
-						afterExec: opts.afterExec,
+						beforeExec: execScriptsHooks.beforeExec,
+						afterExec: execScriptsHooks.afterExec,
 					});
 				},
 			}));
@@ -266,7 +266,7 @@ export default function importHTML(url, opts = {}) {
 }
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch, getTemplate = defaultGetTemplate, beforeExec, afterExec } = opts;
+	const { fetch = defaultFetch, getTemplate = defaultGetTemplate } = opts;
 	const getPublicPath = opts.getPublicPath || opts.getDomain || defaultGetPublicPath;
 
 	if (!entry) {
@@ -279,8 +279,6 @@ export function importEntry(entry, opts = {}) {
 			fetch,
 			getPublicPath,
 			getTemplate,
-			beforeExec,
-			afterExec,
 		});
 	}
 
@@ -296,15 +294,15 @@ export function importEntry(entry, opts = {}) {
 			assetPublicPath: getPublicPath(entry),
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
-			execScripts: (proxy, strictGlobal) => {
+			execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
 				if (!scripts.length) {
 					return Promise.resolve();
 				}
 				return execScripts(scripts[scripts.length - 1], scripts, proxy, {
 					fetch,
 					strictGlobal,
-					beforeExec,
-					afterExec,
+					beforeExec: execScriptsHooks.beforeExec,
+					afterExec: execScriptsHooks.afterExec,
 				});
 			},
 		}));
