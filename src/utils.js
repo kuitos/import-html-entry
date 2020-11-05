@@ -17,12 +17,12 @@ function shouldSkipProperty(global, p) {
 	if (isIE11) {
 		// https://github.com/kuitos/import-html-entry/pull/32，最小化 try 范围
 		try {
-			return global[p] && global[p].parent === window;
+			return global[p] && typeof window !== 'undefined' && global[p].parent === window;
 		} catch (err) {
-			return true
+			return true;
 		}
 	} else {
-		return false
+		return false;
 	}
 }
 
@@ -82,8 +82,8 @@ export function getInlineCode(match) {
 }
 
 export function defaultGetPublicPath(entry) {
-	if(typeof entry === 'object'){
-		return '/'
+	if (typeof entry === 'object') {
+		return '/';
 	}
 	try {
 		// URL 构造函数不支持使用 // 前缀的 url
