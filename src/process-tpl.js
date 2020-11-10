@@ -43,7 +43,25 @@ export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${asyn
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 export const genModuleScriptReplaceSymbol = (scriptSrc, moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ${scriptSrc} ignored by import-html-entry -->`;
-
+export var convertStyleContent = function convertStyleContent(styleSrc, styleText) {
+	var rUrl = /(https?|data):/;
+	var replacement = function ($0, prefix, path, suffix) {
+	if (rUrl.test(path)) {
+		return $0;
+	} else if (path.charAt(0) === '/' && new URL(styleSrc).origin === location.origin) {
+		return $0;
+	} else {
+		return prefix + new URL(path, styleSrc) + suffix;
+	}
+	};
+	// transform leading `@import 'xxx.css'`
+	styleText = styleText.replace(/(@import\s*['"])([^'"]+)(['"])/g, replacement);
+	// transform `url(xxx.jpg)`
+	styleText = styleText.replace(/(url\(\s*['"]?)([^'"\s()]+)(['"]?\s*\))/g, replacement);
+	// transform trailing `sourceMappingURL=xxx.map`
+	styleText = styleText.replace(/(\/[*\/][@#] sourceMappingURL=)(\S+)(( \*\/)?[\r\n]*)$/mg, replacement);
+	return styleText;
+};
 /**
  * parse the script link from the template
  * 1. collect stylesheets
