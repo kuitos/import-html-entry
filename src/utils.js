@@ -120,7 +120,7 @@ export const requestIdleCallback =
 	};
 
 export function readResAsString(response) {
-	// 如果没header，test环境下
+	// 如果没headers，发生在test环境下的mock数据，为兼容原有测试用例
 	if (!response.headers) {
 		return response.text();
 	}

@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
-import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback, readResAsString } from './utils';
+import { readResAsString, defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
 
 const styleCache = {};
 const scriptCache = {};

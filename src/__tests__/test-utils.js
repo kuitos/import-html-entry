@@ -3,7 +3,6 @@ import { defaultGetPublicPath, readResAsString } from '../utils';
 
 describe('utils', () => {
 	it('defaultGetPublicPath', () => {
-
 		// "testURL": "http://test.com/path/"
 		const publicPaths = [
 			'/a/b/c/index.html',
@@ -42,17 +41,21 @@ describe('utils', () => {
 
 	describe('readResAsString', () => {
 		it ('should invoke text method when no headers found', () => {
+			// arrange
 			const fn = jest.fn();
 			const response = {
 				text: fn,
 			};
 
+			// act
 			readResAsString(response);
 
+			// assert
 			expect(fn).toBeCalledTimes(1);
 		});
 
 		it ('should invoke text method when content-type in response headers', () => {
+			// arrange
 			const fn = jest.fn();
 			const response = {
 				headers: {
@@ -63,12 +66,15 @@ describe('utils', () => {
 				text: fn,
 			};
 
+			// act
 			readResAsString(response);
 
+			// assert
 			expect(fn).toBeCalledTimes(1);
 		});
 
 		it ('should invoke text method when content-type has utf-8 charset', () => {
+			// arrange
 			const fn = jest.fn();
 			const response = {
 				headers: {
@@ -79,13 +85,16 @@ describe('utils', () => {
 				text: fn,
 			};
 
+			// act
 			readResAsString(response);
 
+			// assert
 			expect(fn).toBeCalledTimes(1);
 		});
 
 		it ('should parse stream correctly with non-utf-8 charset', async() => {
 			async function runner(encoding, expected) {
+				// arrage
 				const type = `text/html;charset=${encoding}`;
 				const decoded = iconv.encode(expected, encoding);
 				const response = {
@@ -99,7 +108,10 @@ describe('utils', () => {
 					})
 				};
 
+				// act
 				const actual = await readResAsString(response);
+
+				// assert
 				expect(actual).toBe(expected);
 			}
 
