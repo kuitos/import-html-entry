@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
-import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
+import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback, readResAsString } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -64,7 +64,7 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 			} else {
 				// external styles
 				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+					(styleCache[styleLink] = fetch(styleLink).then(readResAsString));
 			}
 
 		},
@@ -84,7 +84,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 				throw new Error(`${scriptUrl} load failed with status ${response.status}`);
 			}
 
-			return response.text();
+			return readResAsString(response);
 		}));
 
 	return Promise.all(scripts.map(script => {
@@ -239,7 +239,7 @@ export default function importHTML(url, opts = {}) {
 	}
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
-		.then(response => response.text())
+		.then(readResAsString)
 		.then(html => {
 
 			const assetPublicPath = getPublicPath(url);
