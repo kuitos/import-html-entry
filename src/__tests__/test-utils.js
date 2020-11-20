@@ -54,7 +54,7 @@ describe('utils', () => {
 			expect(fn).toBeCalledTimes(1);
 		});
 
-		it ('should invoke text method when content-type in response headers', () => {
+		it ('should invoke text method when content-type is not in response headers', () => {
 			// arrange
 			const fn = jest.fn();
 			const response = {
