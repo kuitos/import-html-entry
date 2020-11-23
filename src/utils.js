@@ -119,7 +119,12 @@ export const requestIdleCallback =
 		}, 1);
 	};
 
-export function readResAsString(response) {
+export function readResAsString(response, autoDetectCharset) {
+	// 未启用自动检测
+	if (!autoDetectCharset) {
+		return response.text();
+	}
+
 	// 如果没headers，发生在test环境下的mock数据，为兼容原有测试用例
 	if (!response.headers) {
 		return response.text();

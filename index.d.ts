@@ -19,6 +19,7 @@ export type ImportEntryOpts = {
 	fetch?: typeof window.fetch;
 	getPublicPath?: (entry: Entry) => string;
 	getTemplate?: (tpl: string) => string;
+	autoDetectCharset?: boolean;
 }
 
 export type ExecScriptsHooks = {

@@ -40,7 +40,7 @@ describe('utils', () => {
 	});
 
 	describe('readResAsString', () => {
-		it ('should invoke text method when no headers found', () => {
+		it ('should invoke text method when autoDetectCharset option is not enabled', () => {
 			// arrange
 			const fn = jest.fn();
 			const response = {
@@ -49,6 +49,20 @@ describe('utils', () => {
 
 			// act
 			readResAsString(response);
+
+			// assert
+			expect(fn).toBeCalledTimes(1);
+		});
+
+		it ('should invoke text method when no headers found', () => {
+			// arrange
+			const fn = jest.fn();
+			const response = {
+				text: fn,
+			};
+
+			// act
+			readResAsString(response, true);
 
 			// assert
 			expect(fn).toBeCalledTimes(1);
@@ -67,7 +81,7 @@ describe('utils', () => {
 			};
 
 			// act
-			readResAsString(response);
+			readResAsString(response, true);
 
 			// assert
 			expect(fn).toBeCalledTimes(1);
@@ -86,7 +100,7 @@ describe('utils', () => {
 			};
 
 			// act
-			readResAsString(response);
+			readResAsString(response, true);
 
 			// assert
 			expect(fn).toBeCalledTimes(1);
@@ -109,7 +123,7 @@ describe('utils', () => {
 				};
 
 				// act
-				const actual = await readResAsString(response);
+				const actual = await readResAsString(response, true);
 
 				// assert
 				expect(actual).toBe(expected);

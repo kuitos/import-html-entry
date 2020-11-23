@@ -64,7 +64,7 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 			} else {
 				// external styles
 				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(readResAsString));
+					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
 			}
 
 		},
@@ -84,7 +84,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 				throw new Error(`${scriptUrl} load failed with status ${response.status}`);
 			}
 
-			return readResAsString(response);
+			return response.text();
 		}));
 
 	return Promise.all(scripts.map(script => {
@@ -239,7 +239,7 @@ export default function importHTML(url, opts = {}) {
 	}
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
-		.then(readResAsString)
+		.then(response => readResAsString(response, opts.autoDetectCharset))
 		.then(html => {
 
 			const assetPublicPath = getPublicPath(url);
