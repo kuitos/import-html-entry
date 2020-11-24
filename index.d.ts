@@ -16,7 +16,7 @@ interface IImportResult {
 }
 
 export type ImportEntryOpts = {
-	fetch?: typeof window.fetch;
+	fetch?: typeof window.fetch | { fn?: typeof window.fetch, autoDecodeResponse?: boolean }
 	getPublicPath?: (entry: Entry) => string;
 	getTemplate?: (tpl: string) => string;
 }

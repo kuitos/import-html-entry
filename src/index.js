@@ -5,7 +5,7 @@
  */
 
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
-import { defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
+import { readResAsString, defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -226,6 +226,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 export default function importHTML(url, opts = {}) {
 	let fetch = defaultFetch;
+	let autoDecodeResponse = false;
 	let getPublicPath = defaultGetPublicPath;
 	let getTemplate = defaultGetTemplate;
 
@@ -233,13 +234,22 @@ export default function importHTML(url, opts = {}) {
 	if (typeof opts === 'function') {
 		fetch = opts;
 	} else {
-		fetch = opts.fetch || defaultFetch;
+		// fetch option is availble
+		if (opts.fetch) {
+			// fetch is a funciton
+			if (typeof opts.fetch === 'function') {
+				fetch = opts.fetch;
+			} else { // configuration
+				fetch = opts.fetch.fn || defaultFetch;
+				autoDecodeResponse = !!opts.fetch.autoDecodeResponse;
+			}
+		}
 		getPublicPath = opts.getPublicPath || opts.getDomain || defaultGetPublicPath;
 		getTemplate = opts.getTemplate || defaultGetTemplate;
 	}
 
 	return embedHTMLCache[url] || (embedHTMLCache[url] = fetch(url)
-		.then(response => response.text())
+		.then(response => readResAsString(response, autoDecodeResponse))
 		.then(html => {
 
 			const assetPublicPath = getPublicPath(url);
