@@ -5,7 +5,14 @@
  */
 
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
-import { readResAsString, defaultGetPublicPath, getGlobalProp, getInlineCode, noteGlobalProps, requestIdleCallback } from './utils';
+import {
+	defaultGetPublicPath,
+	getGlobalProp,
+	getInlineCode,
+	noteGlobalProps,
+	readResAsString,
+	requestIdleCallback,
+} from './utils';
 
 const styleCache = {};
 const scriptCache = {};
@@ -51,8 +58,8 @@ function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
 	globalWindow.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
-		? `;(function(window, self){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy);`
-		: `;(function(window, self){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy);`;
+		? `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
+		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
 }
 
 // for prefetch
