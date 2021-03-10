@@ -6,7 +6,7 @@
 import { getInlineCode, isModuleScriptSupported } from './utils';
 
 const ALL_SCRIPT_REGEX = /(<script[\s\S]*?>)[\s\S]*?<\/script>/gi;
-const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|')text\/ng-template\3).)*?>.*?<\/\1>/is;
+const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|")text\/ng-template\3).)*?>.*?<\/\1>/is;
 const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_TYPE_REGEX = /.*\stype=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
