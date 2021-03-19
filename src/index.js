@@ -92,6 +92,8 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			}
 
 			return response.text();
+		}).catch(e => {
+			errorCallback();
 		}));
 
 	return Promise.all(scripts.map(script => {
