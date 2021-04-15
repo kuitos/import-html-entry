@@ -164,8 +164,8 @@ importEntry('./subApp/index.html')
 #### execScripts(entry, scripts, proxy, opts?)
 
 ##### Parameters
-- entry - `string` - required, The URL of entry assets (will use last of scripts when entry is not set).
-- scripts - `string[]` - required, The URL for scripts (should always include entry when entry is set).
+- entry - `string` - required, The URL of entry assets (will use last of scripts when entry is null).
+- scripts - `string[]` - required, The URL for scripts (should always include entry when entry is valid URL).
 - proxy - `Window` - required, Window or proxy window.
 - opts - `ExecScriptsOpts` - optional, Exec configuration.
 
