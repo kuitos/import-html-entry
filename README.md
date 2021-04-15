@@ -38,17 +38,22 @@ importHTML('./subApp/index.html')
 
 ## API
 
-#### importHTML(url, opts?)
-###### Parameters
+  - [importHTML](#importhtmlurl-opts)
+  - [importEntry](#importentryentry-opts)
+  - [execScripts](#execscriptsentry-scripts-proxy-opts)
 
+
+#### importHTML(url, opts?)
+
+##### Parameters
 - url - `string` - required, URL of the index HTML.
 - opts - `ImportEntryOpts` - optional, Load configuration.
 
-###### Return
-
+##### Return
 - `Promise<IImportResult>`
-###### Type
 
+
+##### Type
 - ImportEntryOpts
     - fetch - `typeof window.fetch | { fn?: typeof window.fetch, autoDecodeResponse?: boolean }` - optional, Custom fetch method.
         - autoDecodeResponse - optional, Auto decode when the charset is not `utf-8`(like `gbk` or `gb2312`), default is `false`.
@@ -72,11 +77,10 @@ importHTML('./subApp/index.html')
         - code - The inline script as a string.
         - script - The URL of external script.
 
-###### Usage
+##### Usage
 Treats the index html as manifest and loads the assets(css,js), export last property on the `window` or `proxy window` which set by the entry script.
 
-###### Sample
-
+##### Sample
 ```js
 import importHTML from 'import-html-entry';
 
@@ -100,17 +104,14 @@ importHTML('./subApp/index.html')
 
 #### importEntry(entry, opts?)
 
-###### Parameters
-
+##### Parameters
 - entry - `Entry` - required, URL of the index HTML or assets.
 - opts - `ImportEntryOpts` - optional, Load configuration.
 
-###### Return
-
+##### Return
 - `Promise<IImportResult>`
 
-###### Type
-
+##### Type
 - Entry - `string | { styles?: string[], scripts?: string[], html?: string }` - When type as string, importEntry will run as importHTML, otherwise will load scripts and add styleSheets in your HTML string which you're provided or not.
     - styles - The URL for styles.
     - scripts - The URL for scripts.
@@ -118,13 +119,11 @@ importHTML('./subApp/index.html')
 
 > Other type as same as [importHTML](#importhtmlurl-opts).
 
-###### Usage
-
+##### Usage
 Loads the assets(css,js) and embed into HTML template, export last property on the `window` or `proxy window` which set by the entry script.
 
 
-###### Sample
-
+##### Sample
 ```js
 import { importEntry } from 'import-html-entry';
 
@@ -164,18 +163,16 @@ importEntry('./subApp/index.html')
 
 #### execScripts(entry, scripts, proxy, opts?)
 
-###### Parameters
-
+##### Parameters
 - entry - `string` - required, The URL of entry assets (will use last of scripts when entry is not set).
 - scripts - `string[]` - required, The URL for scripts (should always include entry when entry is set).
 - proxy - `Window` - required, Window or proxy window.
 - opts - `ExecScriptsOpts` - optional, Exec configuration.
 
-###### Return
-
+##### Return
 - `Promise<T>` - The returned value is the last property on `window` or `proxy window` which set by the entry script.
-###### Type
 
+##### Type
 - ExecScriptsOpts
     - fetch - `typeof window.fetch` - optional, Custom fetch method.
     - strictGlobal - `boolean` - optional, Strictly enforce the `sandbox`.
@@ -184,12 +181,10 @@ importEntry('./subApp/index.html')
 	- error - `CallableFunction` - optional, Use callback to get the result when error.
     - [ExecScriptsHooks](#ExecScriptsHooks).
 
-###### Usage
-
+##### Usage
 Loads the scripts by URL on the custom sandbox, export last property on the `window` or `proxy window` which set by the entry script.
 
-###### Sample
-
+##### Sample
 ```js
 import { execScripts } from 'import-html-entry';
 
