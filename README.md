@@ -1,5 +1,5 @@
 # import-html-entry
-Treats the index html as manifest and loads the assets(css,js), export last property on the `window` or `proxy window` which set by the entry script.
+Treats the index html as manifest and loads the assets(css,js), get the exports from entry script.
 
 ```html
 <!-- subApp/index.html -->
@@ -57,7 +57,7 @@ importHTML('./subApp/index.html')
 - ImportEntryOpts
     - fetch - `typeof window.fetch | { fn?: typeof window.fetch, autoDecodeResponse?: boolean }` - optional, Custom fetch method.
         - autoDecodeResponse - optional, Auto decode when the charset is not `utf-8`(like `gbk` or `gb2312`), default is `false`.
-	- getPublicPath - `(entry: Entry) => string` - optional, Customize the assets public path.
+    - getPublicPath - `(entry: Entry) => string` - optional, Customize the assets public path.
     - getTemplate - `(tpl: string) => string` - optional, Customize the HTML template before proceeding.
 
 - IImportResult
@@ -78,7 +78,7 @@ importHTML('./subApp/index.html')
         - script - The URL of external script.
 
 ##### Usage
-Treats the index html as manifest and loads the assets(css,js), export last property on the `window` or `proxy window` which set by the entry script.
+Treats the index html as manifest and loads the assets(css,js), get the exports from entry script.
 
 ##### Sample
 ```js
@@ -120,8 +120,7 @@ importHTML('./subApp/index.html')
 > Other type as same as [importHTML](#importhtmlurl-opts).
 
 ##### Usage
-Loads the assets(css,js) and embed into HTML template, export last property on the `window` or `proxy window` which set by the entry script.
-
+Loads the assets(css,js) and embed into HTML template, get the exports from entry script.
 
 ##### Sample
 ```js
@@ -182,7 +181,7 @@ importEntry('./subApp/index.html')
     - [ExecScriptsHooks](#ExecScriptsHooks).
 
 ##### Usage
-Loads the scripts by URL on the custom sandbox, export last property on the `window` or `proxy window` which set by the entry script.
+Loads the scripts by URL on the custom sandbox, get the exports from entry script.
 
 ##### Sample
 ```js
