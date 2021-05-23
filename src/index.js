@@ -17,6 +17,7 @@ import {
 const styleCache = {};
 const scriptCache = {};
 const embedHTMLCache = {};
+const evalCache = {};
 if (!window.fetch) {
 	throw new Error('[import-html-entry] Here is no "fetch" on the window env, you need to polyfill it');
 }
@@ -161,7 +162,15 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				const rawCode = beforeExec(inlineScript, scriptSrc) || inlineScript;
 				const code = getExecutableScript(scriptSrc, rawCode, proxy, strictGlobal);
 
-				(0, eval)(code);
+				const key = scriptSrc + rawCode.length;
+				if (!evalCache[key]) {
+					const evalCode = `window.__TEMP_EVAL_FUNC__ = function(){${code}}`;
+					(0, eval)(evalCode);
+					evalCache[key]= window.__TEMP_EVAL_FUNC__;
+					window.__TEMP_EVAL_FUNC__ = null;
+				}
+				const evalFunc = evalCache[key];
+				evalFunc.call(window);
 
 				afterExec(inlineScript, scriptSrc);
 			};
