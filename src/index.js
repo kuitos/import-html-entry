@@ -7,6 +7,7 @@
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
 import {
 	defaultGetPublicPath,
+	evalCode,
 	getGlobalProp,
 	getInlineCode,
 	noteGlobalProps,
@@ -162,15 +163,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				const rawCode = beforeExec(inlineScript, scriptSrc) || inlineScript;
 				const code = getExecutableScript(scriptSrc, rawCode, proxy, strictGlobal);
 
-				const key = scriptSrc + rawCode.length;
-				if (!evalCache[key]) {
-					const evalCode = `window.__TEMP_EVAL_FUNC__ = function(){${code}}`;
-					(0, eval)(evalCode);
-					evalCache[key]= window.__TEMP_EVAL_FUNC__;
-					window.__TEMP_EVAL_FUNC__ = null;
-				}
-				const evalFunc = evalCache[key];
-				evalFunc.call(window);
+				evalCode(scriptSrc, code, evalCache);
 
 				afterExec(inlineScript, scriptSrc);
 			};
