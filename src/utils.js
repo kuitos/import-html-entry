@@ -167,8 +167,10 @@ export function readResAsString(response, autoDetectCharset) {
 		}));
 }
 
-export function evalCode(scriptSrc, code, evalCache = {}) {
-	const key = scriptSrc + code.length;
+const evalCache = {};
+
+export function evalCode(scriptSrc, code) {
+	const key = scriptSrc;
 	if (!evalCache[key]) {
 		const functionWrappedCode = `window.__TEMP_EVAL_FUNC__ = function(){${code}}`;
 		(0, eval)(functionWrappedCode);

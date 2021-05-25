@@ -142,10 +142,9 @@ describe('utils', () => {
 			const logSpyInstance = jest.spyOn(console, 'log');
 			logSpyInstance.mockImplementation(jest.fn());
 
-			const evalCache = {};
 			const expectCode = 'console.log("hello")';
 			const scriptSrc = `<script>${expectCode}</script>`;
-			evalCode(scriptSrc, expectCode, evalCache);
+			evalCode(scriptSrc, expectCode);
 
 			expect(logSpyInstance).toHaveBeenCalledTimes(1);
 			expect(logSpyInstance).toHaveBeenCalledWith('hello');
@@ -158,13 +157,12 @@ describe('utils', () => {
 			const logSpyInstance = jest.spyOn(console, 'log');
 			logSpyInstance.mockImplementation(jest.fn());
 
-			const evalCache = {};
-			const expectCode = 'console.log("hello")';
+			const expectCode = 'console.log("hello, China")';
 			const scriptSrc1 = `<script>${expectCode}</script>`;
 			const scriptSrc2 = `<script>${expectCode}</script>`;
 
-			evalCode(scriptSrc1, expectCode, evalCache);
-			evalCode(scriptSrc2, expectCode, evalCache);
+			evalCode(scriptSrc1, expectCode);
+			evalCode(scriptSrc2, expectCode);
 
 			//use cache, eval once
 			expect(evalSpyInstance).toHaveBeenCalledTimes(1);
@@ -183,15 +181,14 @@ describe('utils', () => {
 			logSpyInstance.mockImplementation(jest.fn());
 			infoSpyInstance.mockImplementation(jest.fn());
 
-			const evalCache = {};
-			const expectCode1 = 'console.log("hello")';
-			const expectCode2 = 'console.info("hello")';
+			const expectCode1 = 'console.log("hello, friend")';
+			const expectCode2 = 'console.info("hello, friend")';
 
 			const scriptSrc1 = `<script>${expectCode1}</script>`;
 			const scriptSrc2 = `<script>${expectCode2}</script>`;
 
-			evalCode(scriptSrc1, expectCode1, evalCache);
-			evalCode(scriptSrc2, expectCode2, evalCache);
+			evalCode(scriptSrc1, expectCode1);
+			evalCode(scriptSrc2, expectCode2);
 
 			//not use cache, eval twice
 			expect(evalSpyInstance).toHaveBeenCalledTimes(2);
