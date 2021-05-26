@@ -56,7 +56,7 @@ function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
 	// 否则在嵌套场景下， window.proxy 设置的是内层应用的 window，而代码其实是在全局作用域运行的，会导致闭包里的 window.proxy 取的是最外层的微应用的 proxy
 	const globalWindow = (0, eval)('window');
 	globalWindow.proxy = proxy;
-	// TODO 通过 strictGlobal 方式切换切换 with 闭包，待 with 方式坑趟平后再合并
+	// TODO 通过 strictGlobal 方式切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
 		? `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
 		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
