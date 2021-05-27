@@ -175,7 +175,7 @@ export function evalCode(scriptSrc, code) {
 		const functionWrappedCode = `window.__TEMP_EVAL_FUNC__ = function(){${code}}`;
 		(0, eval)(functionWrappedCode);
 		evalCache[key] = window.__TEMP_EVAL_FUNC__;
-		window.__TEMP_EVAL_FUNC__ = null;
+		delete window.__TEMP_EVAL_FUNC__;
 	}
 	const evalFunc = evalCache[key];
 	evalFunc.call(window);
