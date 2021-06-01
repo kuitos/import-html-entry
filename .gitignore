@@ -24,8 +24,6 @@ hs_err_pid*
 .idea/
 example/bundle.js
 example/bundle.js.map
-lib/
-esm/
 node_modules/
 dist
 yarn.lock
