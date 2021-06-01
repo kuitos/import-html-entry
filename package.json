@@ -77,7 +77,8 @@
       "/dist/"
     ],
     "setupFiles": [
-      "./test/setup.js"
+      "./test/setup.js",
+      "@nteract/mockument"
     ]
   },
   "dependencies": {
