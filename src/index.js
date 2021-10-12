@@ -239,6 +239,7 @@ export default function importHTML(url, opts = {}) {
 	let autoDecodeResponse = false;
 	let getPublicPath = defaultGetPublicPath;
 	let getTemplate = defaultGetTemplate;
+	const { postProcessTemplate } = opts;
 
 	// compatible with the legacy importHTML api
 	if (typeof opts === 'function') {
@@ -263,7 +264,7 @@ export default function importHTML(url, opts = {}) {
 		.then(html => {
 
 			const assetPublicPath = getPublicPath(url);
-			const { template, scripts, entry, styles } = processTpl(getTemplate(html), assetPublicPath);
+			const { template, scripts, entry, styles } = processTpl(getTemplate(html), assetPublicPath, postProcessTemplate);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
 				template: embedHTML,
@@ -286,7 +287,7 @@ export default function importHTML(url, opts = {}) {
 }
 
 export function importEntry(entry, opts = {}) {
-	const { fetch = defaultFetch, getTemplate = defaultGetTemplate } = opts;
+	const { fetch = defaultFetch, getTemplate = defaultGetTemplate, postProcessTemplate } = opts;
 	const getPublicPath = opts.getPublicPath || opts.getDomain || defaultGetPublicPath;
 
 	if (!entry) {
@@ -299,6 +300,7 @@ export function importEntry(entry, opts = {}) {
 			fetch,
 			getPublicPath,
 			getTemplate,
+			postProcessTemplate,
 		});
 	}
 
