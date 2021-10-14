@@ -15,10 +15,23 @@ interface IImportResult {
 	getExternalStyleSheets(): Promise<string[]>;
 }
 
+interface TemplateScriptObject {
+	async: boolean;
+	src: string;
+}
+
+interface TemplateResult {
+	template: string;
+	scripts: (string | TemplateScriptObject)[];
+	styles: string[];
+	entry: string | TemplateScriptObject;
+}
+
 export type ImportEntryOpts = {
 	fetch?: typeof window.fetch | { fn?: typeof window.fetch, autoDecodeResponse?: boolean }
 	getPublicPath?: (entry: Entry) => string;
 	getTemplate?: (tpl: string) => string;
+	postProcessTemplate?: (tplResult: TemplateResult) => TemplateResult;
 }
 
 export type ExecScriptsHooks = {
