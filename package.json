@@ -1,6 +1,6 @@
 {
-  "name": "import-html-entry",
-  "version": "1.11.1",
+  "name": "@satumjs/import-html-entry",
+  "version": "0.0.1",
   "description": "import html and get the exports of entry",
   "main": "./lib/index.js",
   "module": "./esm/index.js",
@@ -23,22 +23,23 @@
     "prepublishOnly": "npm run build",
     "release": "np --no-cleanup --yolo --no-publish --any-branch",
     "test": "jest --coverage",
-    "codecov": "codecov"
+    "codecov": "codecov",
+    "pub": "npm run build && npm publish --access public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kuitos/import-html-entry.git"
+    "url": "git+https://github.com/satumjs/import-html-entry.git"
   },
   "keywords": [
     "html",
     "importer"
   ],
-  "author": "Kuitos",
+  "author": "Kuitos & valleykid",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kuitos/import-html-entry/issues"
+    "url": "https://github.com/satumjs/import-html-entry/issues"
   },
-  "homepage": "https://github.com/kuitos/import-html-entry#readme",
+  "homepage": "https://github.com/satumjs/import-html-entry#readme",
   "browserslist": [
     "> 1%",
     "last 6 versions",
