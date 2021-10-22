@@ -3,20 +3,27 @@
  * @since 2019-05-16
  */
 
+type IImportFileData = { src: string; data: string; async?: boolean; module?: boolean; };
+
 interface IImportResult {
+	entry: Entry;
+
 	template: string;
 
 	assetPublicPath: string;
 
+	entryScript: string;
+
 	execScripts<T>(sandbox?: object, strictGlobal?: boolean, execScriptsHooks?: ExecScriptsHooks): Promise<T>;
 
-	getExternalScripts(): Promise<string[]>;
+	getExternalScripts(): Promise<(string | IImportFileData)[]>;
 
-	getExternalStyleSheets(): Promise<string[]>;
+	getExternalStyleSheets(): Promise<(string | IImportFileData)[]>;
 }
 
 interface TemplateScriptObject {
-	async: boolean;
+	async?: boolean;
+	module?: boolean;
 	src: string;
 }
 

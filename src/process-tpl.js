@@ -39,7 +39,7 @@ function isValidJavaScriptType(type) {
 }
 
 export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
-export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
+export const genScriptReplaceSymbol = (scriptSrc, async = false, mod = false) => `<!-- ${async ? 'async' : mod ? 'module' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 export const genModuleScriptReplaceSymbol = (scriptSrc, moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ${scriptSrc} ignored by import-html-entry -->`;
@@ -155,8 +155,12 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 
 				if (matchedScriptSrc) {
 					const asyncScript = !!scriptTag.match(SCRIPT_ASYNC_REGEX);
-					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
-					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
+					const moduleScript = !!scriptTag.match(SCRIPT_MODULE_REGEX);
+					const result = { src: matchedScriptSrc };
+					if (asyncScript) result.async = true;
+					if (moduleScript) result.module = true;
+					scripts.push(asyncScript || moduleScript ? result : matchedScriptSrc);
+					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript, moduleScript);
 				}
 
 				return match;

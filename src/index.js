@@ -40,7 +40,7 @@ function getEmbedHTML(template, styles, opts = {}) {
 	return getExternalStyleSheets(styles, fetch)
 		.then(styleSheets => {
 			embedHTML = styles.reduce((html, styleSrc, i) => {
-				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
+				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i].data || styleSheets[i]}</style>`);
 				return html;
 			}, embedHTML);
 			return embedHTML;
@@ -71,7 +71,12 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 			} else {
 				// external styles
 				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+					(styleCache[styleLink] = fetch(styleLink).then(response => {
+						const res = response.text();
+						if (!res) return res;
+						if ('then' in res) return res.then(data => ({ src: styleLink, data }));
+						return { src: styleLink, data: res };
+					}));
 			}
 
 		},
@@ -102,23 +107,23 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			if (typeof script === 'string') {
 				if (isInlineCode(script)) {
 					// if it is inline script
-					return getInlineCode(script);
-				} else {
-					// external script
-					return fetchScript(script);
+					const data = getInlineCode(script);
+					return /\s+module\s+/.test(script) ? { module: true, data } : data;
 				}
+				// external script
+				return fetchScript(script).then(data => ({ src: script, data }));
 			} else {
 				// use idle time to load async script
 				const { src, async } = script;
 				if (async) {
 					return {
 						src,
-						async: true,
+						async,
 						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src).then(resolve, reject))),
 					};
 				}
 
-				return fetchScript(src);
+				return fetchScript(src).then(data => ({ ...script, data }));
 			}
 		},
 	));
@@ -218,7 +223,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 				if (i < scripts.length) {
 					const scriptSrc = scripts[i];
-					const inlineScript = scriptsText[i];
+					const inlineScript = scriptsText[i].async ? scriptsText[i] : (scriptsText[i].data || scriptsText[i]);
 
 					exec(scriptSrc, inlineScript, resolvePromise);
 					// resolve the promise while the last script executed and entry not provided
@@ -267,8 +272,10 @@ export default function importHTML(url, opts = {}) {
 			const { template, scripts, entry, styles } = processTpl(getTemplate(html), assetPublicPath, postProcessTemplate);
 
 			return getEmbedHTML(template, styles, { fetch }).then(embedHTML => ({
+				entry: url,
 				template: embedHTML,
 				assetPublicPath,
+				entryScript: entry,
 				getExternalScripts: () => getExternalScripts(scripts, fetch),
 				getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 				execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
@@ -310,17 +317,20 @@ export function importEntry(entry, opts = {}) {
 		const { scripts = [], styles = [], html = '' } = entry;
 		const getHTMLWithStylePlaceholder = tpl => styles.reduceRight((html, styleSrc) => `${genLinkReplaceSymbol(styleSrc)}${html}`, tpl);
 		const getHTMLWithScriptPlaceholder = tpl => scripts.reduce((html, scriptSrc) => `${html}${genScriptReplaceSymbol(scriptSrc)}`, tpl);
+		const entryScript = scripts[scripts.length - 1];
 
 		return getEmbedHTML(getTemplate(getHTMLWithScriptPlaceholder(getHTMLWithStylePlaceholder(html))), styles, { fetch }).then(embedHTML => ({
+			entry,
 			template: embedHTML,
 			assetPublicPath: getPublicPath(entry),
+			entryScript,
 			getExternalScripts: () => getExternalScripts(scripts, fetch),
 			getExternalStyleSheets: () => getExternalStyleSheets(styles, fetch),
 			execScripts: (proxy, strictGlobal, execScriptsHooks = {}) => {
 				if (!scripts.length) {
 					return Promise.resolve();
 				}
-				return execScripts(scripts[scripts.length - 1], scripts, proxy, {
+				return execScripts(entryScript, scripts, proxy, {
 					fetch,
 					strictGlobal,
 					beforeExec: execScriptsHooks.beforeExec,
