@@ -42,7 +42,7 @@ function getEmbedHTML(template, styles, opts = {}) {
 	return getExternalStyleSheets(styles, fetch)
 		.then(styleSheets => {
 			embedHTML = styles.reduce((html, styleSrc, i) => {
-				html = html.replace(genLinkReplaceSymbol(styleSrc), `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
+				html = html.replace(genLinkReplaceSymbol(styleSrc), isInlineCode(styleSrc) ? `${styleSrc}` : `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
 				return html;
 			}, embedHTML);
 			return embedHTML;
