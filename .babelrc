@@ -1,25 +1,29 @@
 {
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "modules": false
-      }
-    ]
+    "@babel/preset-env"
   ],
   "plugins": [
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-optional-chaining"
   ],
   "env": {
-    "lib": {
+    "esm": {
       "presets": [
-        "@babel/preset-env"
-      ]
-    },
-    "test": {
-      "presets": [
-        "@babel/preset-env"
+        [
+          "@babel/preset-env",
+          {
+            "modules": false
+          }
+        ]
+      ],
+      "plugins": [
+        [
+          "@babel/plugin-transform-runtime",
+          {
+            "useESModules": true
+          }
+        ],
+        "@babel/plugin-proposal-optional-chaining"
       ]
     }
   }
