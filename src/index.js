@@ -51,17 +51,13 @@ function getEmbedHTML(template, styles, opts = {}) {
 
 const isInlineCode = code => code.startsWith('<');
 
-function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
+function getExecutableScript(scriptSrc, scriptText, strictGlobal) {
 	const sourceUrl = isInlineCode(scriptSrc) ? '' : `//# sourceURL=${scriptSrc}\n`;
 
-	// 通过这种方式获取全局 window，因为 script 也是在全局作用域下运行的，所以我们通过 window.proxy 绑定时也必须确保绑定到全局 window 上
-	// 否则在嵌套场景下， window.proxy 设置的是内层应用的 window，而代码其实是在全局作用域运行的，会导致闭包里的 window.proxy 取的是最外层的微应用的 proxy
-	const globalWindow = (0, eval)('window');
-	globalWindow.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
-		? `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
-		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
+		? `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(proxy)(proxy, proxy, proxy);`
+		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(proxy)(proxy, proxy, proxy);`;
 }
 
 // for prefetch
@@ -161,9 +157,9 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 
 			const geval = (scriptSrc, inlineScript) => {
 				const rawCode = beforeExec(inlineScript, scriptSrc) || inlineScript;
-				const code = getExecutableScript(scriptSrc, rawCode, proxy, strictGlobal);
+				const code = getExecutableScript(scriptSrc, rawCode, strictGlobal);
 
-				evalCode(scriptSrc, code);
+				evalCode(scriptSrc, code, proxy);
 
 				afterExec(inlineScript, scriptSrc);
 			};
