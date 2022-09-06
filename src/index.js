@@ -59,8 +59,9 @@ function getExecutableScript(scriptSrc, scriptText, proxy, strictGlobal) {
 	const globalWindow = (0, eval)('window');
 	globalWindow.proxy = proxy;
 	// TODO 通过 strictGlobal 方式切换 with 闭包，待 with 方式坑趟平后再合并
+	var globalKeyToBeCached = 'document,window,self,globalThis,Array,Object,String,Boolean,Math,Number,Symbol,Date,Promise,Function,Proxy,WeakMap,WeakSet,Set,Map,Reflect,Element,Node,Document,RegExp,Error,TypeError,JSON,isNaN,parseFloat,parseInt,performance,console,decodeURI,encodeURI,decodeURIComponent,encodeURIComponent,location,navigator,undefined'
 	return strictGlobal
-		? `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
+		? `;(function(window, self, globalThis){with(window){(function(${globalKeyToBeCached}){;${scriptText}\n${sourceUrl}}).call(window, ${globalKeyToBeCached})}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
 		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
 }
 
