@@ -8,7 +8,7 @@ interface IImportResult {
 
 	assetPublicPath: string;
 
-	execScripts<T>(sandbox?: object, strictGlobal?: boolean, execScriptsHooks?: ExecScriptsHooks): Promise<T>;
+	execScripts<T>(sandbox?: object, strictGlobal?: boolean, opts?: ExecScriptOpts): Promise<T>;
 
 	getExternalScripts(): Promise<string[]>;
 
@@ -34,14 +34,15 @@ export type ImportEntryOpts = {
 	postProcessTemplate?: (tplResult: TemplateResult) => TemplateResult;
 }
 
-export type ExecScriptsHooks = {
+export type ExecScriptOpts = {
 	// 每个脚本执行之前触发，如果返回的是非空string， 那么将把返回值替换code执行
 	beforeExec?: (code: string, script: string) => string | void;
 	// 每个脚本执行完毕后触发，如果脚本执行报错，那么就不会触发
 	afterExec?: (code: string, script: string) => void;
+	scopedGlobalVariables?: string[];
 }
 
-type ExecScriptsOpts = Pick<ImportEntryOpts, 'fetch'> & ExecScriptsHooks & {
+type ExecScriptsOpts = Pick<ImportEntryOpts, 'fetch'> & ExecScriptOpts & {
 	strictGlobal?: boolean;
 	success?: CallableFunction;
 	error?: CallableFunction;
