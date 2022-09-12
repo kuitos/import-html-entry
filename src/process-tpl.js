@@ -52,6 +52,7 @@ export const genModuleScriptReplaceSymbol = (scriptSrc, moduleSupport) => `<!-- 
  *    see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
  * @param tpl
  * @param baseURI
+ * @param postProcessTemplate
  * @stripStyles whether to strip the css links
  * @returns {{template: void | string | *, scripts: *[], entry: *}}
  */
