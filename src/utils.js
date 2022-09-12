@@ -168,14 +168,14 @@ export function readResAsString(response, autoDetectCharset) {
 
 const evalCache = {};
 
-export function evalCode(scriptSrc, code) {
+export function evalCode(scriptSrc, code, proxy) {
 	const key = scriptSrc;
 	if (!evalCache[key]) {
-		const functionWrappedCode = `window.__TEMP_EVAL_FUNC__ = function(){${code}}`;
+		const functionWrappedCode = `window.__TEMP_EVAL_FUNC__ = function(proxy){${code}}`;
 		(0, eval)(functionWrappedCode);
 		evalCache[key] = window.__TEMP_EVAL_FUNC__;
 		delete window.__TEMP_EVAL_FUNC__;
 	}
 	const evalFunc = evalCache[key];
-	evalFunc.call(window);
+	evalFunc.call(proxy, proxy);
 }
