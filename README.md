@@ -31,7 +31,7 @@ importHTML('./subApp/index.html')
             const { observable } = mobx;
             observable({
                 name: 'kuitos'
-            })	
+            })
         })
 });
 ```
@@ -204,3 +204,11 @@ execScripts(
     }
 );
 ```
+
+## FAQ
+
+### Why is the resolved value of `execScripts` different from my expectation (e.g. `{}` / `null` / other values)?
+
+The `execScripts` will return the last property on `window` or `proxy window` which is set by the entry script. If the html entry has more than one script that is deferred, the resolved value of `execScripts` will be the value set by the last script, which may not be as expected.
+
+To solve this problem, make sure the entry script is the last in the html entry. For example, if you are using `html-webpack-plugin`, you can set `scriptLoading: 'blocking'` in the plugin options.
