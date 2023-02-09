@@ -67,7 +67,7 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 	return strictGlobal
 		? (
 			scopedGlobalVariableFnParameters
-				? `;(function(){with(window.proxy){(function(${scopedGlobalVariableFnParameters}){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(${scopedGlobalVariableFnParameters})}})();`
+				? `;with(window.proxy){(function(${scopedGlobalVariableFnParameters}){;${scriptText}\n${sourceUrl}}).bind(window)(${scopedGlobalVariableFnParameters})};`
 				: `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
 		)
 		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
