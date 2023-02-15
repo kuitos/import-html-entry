@@ -56,7 +56,7 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 
 	const sourceUrl = isInlineCode(scriptSrc) ? '' : `//# sourceURL=${scriptSrc}\n`;
 
-  // 将 scopedGlobalVariables 拼接成函数声明，用于缓存全局变量，避免每次使用时都走一遍代理
+	// 将 scopedGlobalVariables 拼接成函数声明，用于缓存全局变量，避免每次使用时都走一遍代理
 	const scopedGlobalVariableFormalParams = scopedGlobalVariables.length ? scopedGlobalVariables.join(',') : '';
 	// 将实参通过 window.{v} 的方式拼接起来，避免在一些低版本浏览器下，因为变量本身不存在导致直接访问报错
 	const scopedGlobalVariableActualParams = scopedGlobalVariables.length ? scopedGlobalVariables.map(v => `window.${v}`).join(',') : '';
