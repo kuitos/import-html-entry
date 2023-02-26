@@ -177,3 +177,11 @@ export function evalCode(scriptSrc, code) {
 	const evalFunc = evalCache[key];
 	evalFunc.call(window);
 }
+
+// 转换 url 中的转义字符，例如 &amp; => &
+export function parseUrl(url){
+	const parser = new DOMParser();
+	const html = `<script src="${url}"></script>`;
+    const doc = parser.parseFromString(html, "text/html");
+	return doc.scripts[0].src;
+}
