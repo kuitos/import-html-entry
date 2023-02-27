@@ -182,6 +182,6 @@ export function evalCode(scriptSrc, code) {
 export function parseUrl(url){
 	const parser = new DOMParser();
 	const html = `<script src="${url}"></script>`;
-    const doc = parser.parseFromString(html, "text/html");
+	const doc = parser.parseFromString(html, "text/html");
 	return doc.scripts[0].src;
 }
