@@ -3,7 +3,7 @@
  * @homepage https://github.com/kuitos/
  * @since 2018-09-03 15:04
  */
-import { getInlineCode, isModuleScriptSupported } from './utils';
+import { getInlineCode, isModuleScriptSupported, parseUrl } from './utils';
 
 const ALL_SCRIPT_REGEX = /(<script[\s\S]*?>)[\s\S]*?<\/script>/gi;
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|")text\/ng-template\3).)*?>.*?<\/\1>/is;
@@ -92,6 +92,7 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 						return genIgnoreAssetReplaceSymbol(newHref);
 					}
 
+					newHref = parseUrl(newHref);
 					styles.push(newHref);
 					return genLinkReplaceSymbol(newHref);
 				}
@@ -156,6 +157,7 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 
 				if (matchedScriptSrc) {
 					const asyncScript = !!scriptTag.match(SCRIPT_ASYNC_REGEX);
+					matchedScriptSrc = parseUrl(matchedScriptSrc);
 					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
 					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
 				}

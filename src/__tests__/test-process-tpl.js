@@ -14,6 +14,7 @@ test('test process-tpl', () => {
 		'<link rel="preload" href="//gw.alipayobjects.com/as/g/antcloud-fe/antd-cloud-nav/0.2.22/antd-cloud-nav.min.js">\n' +
 		'<link rel="prefetch" href="/a3-ie6-polyfill.js">\n' +
 		'<link rel="stylesheet" href="/umi.css">\n' +
+		'<link rel="stylesheet" href="/escape-character&nbsp;.css?a=&amp;&b=2">\n' +
 		'<link rel="preload" as="font" href="/static/fonts/iconfont.woff" type="font/woff" crossorigin="anonymous">\n' +
 		'\n' +
 		'<meta charset="utf-8">\n' +
@@ -62,6 +63,7 @@ test('test process-tpl', () => {
 		'<div id="root"></div>\n' +
 		'\n' +
 		'<script src="/umi.js"></script>\n' +
+		'<script src="/escape-character&amp;.js"></script>' +
 		'<!-- <script src="/a1.js"></script>' +
 		'-->' +
 		'<script src="/comment.js"></script>\n' +
@@ -89,10 +91,13 @@ test('test process-tpl', () => {
 			src: 'http://kuitos.me/test-async.js',
 		},
 		'http://kuitos.me/umi.js',
+		'http://kuitos.me/escape-character&.js',
 		'http://kuitos.me/comment.js']);
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/test-async.js', true)) !== -1).toBeTruthy();
 	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
+	expect(template.indexOf(genLinkReplaceSymbol('http://kuitos.me/escape-character%C2%A0.css?a=&&b=2')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/umi.js')) !== -1).toBeTruthy();
+	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/escape-character&.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/comment.js')) !== -1).toBeTruthy();
 	expect(template.indexOf(genScriptReplaceSymbol('http://kuitos.me/main-es5.js')) !== -1).toBeTruthy();
 	expect(template.indexOf('<script src="/test-type.json" type="test"></script>') !== -1).toBeTruthy();
@@ -111,6 +116,7 @@ test('test process-tpl', () => {
 
 	const { styles, template: template2 } = processTpl(tpl, 'http://kuitos.me/cdn/');
 	expect(styles[0]).toBe('http://kuitos.me/umi.css');
+	expect(styles[1]).toBe('http://kuitos.me/escape-character%C2%A0.css?a=&&b=2');
 	expect(template2.indexOf(genLinkReplaceSymbol('http://kuitos.me/umi.css')) !== -1).toBeTruthy();
 
 });
