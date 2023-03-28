@@ -98,7 +98,6 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			// usually browser treats 4xx and 5xx response of script loading as an error and will fire a script error event
 			// https://stackoverflow.com/questions/5625420/what-http-headers-responses-trigger-the-onerror-handler-on-a-script-tag/5625603
 			if (response.status >= 400) {
-				errorCallback();
 				throw new Error(`${scriptUrl} load failed with status ${response.status}`);
 			}
 
