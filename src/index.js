@@ -56,8 +56,8 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 
 	const sourceUrl = isInlineCode(scriptSrc) ? '' : `//# sourceURL=${scriptSrc}\n`;
 
-	// 将 scopedGlobalVariables 拼接成函数声明，用于缓存全局变量，避免每次使用时都走一遍代理
-	const scopedGlobalVariableFnParameters = scopedGlobalVariables.length ? scopedGlobalVariables.join(',') : '';
+	// 将 scopedGlobalVariables 拼接成变量声明，用于缓存全局变量，避免每次使用时都走一遍代理
+	const scopedGlobalVariableDefinition = scopedGlobalVariables.length ? `const {${scopedGlobalVariables.join(',')}}=this;` : ''
 
 	// 通过这种方式获取全局 window，因为 script 也是在全局作用域下运行的，所以我们通过 window.proxy 绑定时也必须确保绑定到全局 window 上
 	// 否则在嵌套场景下， window.proxy 设置的是内层应用的 window，而代码其实是在全局作用域运行的，会导致闭包里的 window.proxy 取的是最外层的微应用的 proxy
@@ -66,8 +66,8 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 	// TODO 通过 strictGlobal 方式切换 with 闭包，待 with 方式坑趟平后再合并
 	return strictGlobal
 		? (
-			scopedGlobalVariableFnParameters
-				? `;with(window.proxy){(function(${scopedGlobalVariableFnParameters}){;${scriptText}\n${sourceUrl}}).bind(window)(${scopedGlobalVariableFnParameters})};`
+			scopedGlobalVariableDefinition
+				? `;(function(){with(window.proxy){${scopedGlobalVariableDefinition}${scriptText}\n${sourceUrl}}}).bind(window.proxy)();`
 				: `;(function(window, self, globalThis){with(window){;${scriptText}\n${sourceUrl}}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
 		)
 		: `;(function(window, self, globalThis){;${scriptText}\n${sourceUrl}}).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`;
