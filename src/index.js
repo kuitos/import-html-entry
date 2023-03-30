@@ -238,8 +238,6 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					} else {
 						schedule(i + 1, resolvePromise);
 					}
-				} else {
-					resolvePromise();
 				}
 			}
 
