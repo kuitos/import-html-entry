@@ -26,7 +26,7 @@ const STYLE_IGNORE_REGEX = /<style(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is;
 const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is;
 
 function hasProtocol(url) {
-	return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://');
+	return url.startsWith('http://') || url.startsWith('https://');
 }
 
 function getEntirePath(path, baseURI) {
@@ -137,15 +137,18 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 
 				if (entry && matchedScriptEntry) {
 					throw new SyntaxError('You should not set multiply entry script!');
-				} else {
-
-					// append the domain while the script not have an protocol prefix
-					if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-						matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
-					}
-
-					entry = entry || matchedScriptEntry && matchedScriptSrc;
 				}
+
+        if (matchedScriptSrc) {
+          // append the domain while the script not have a protocol prefix
+          if (!hasProtocol(matchedScriptSrc)) {
+            matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
+          }
+
+          matchedScriptSrc = parseUrl(matchedScriptSrc);
+        }
+
+        entry = entry || matchedScriptEntry && matchedScriptSrc;
 
 				if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
@@ -157,7 +160,6 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 
 				if (matchedScriptSrc) {
 					const asyncScript = !!scriptTag.match(SCRIPT_ASYNC_REGEX);
-					matchedScriptSrc = parseUrl(matchedScriptSrc);
 					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
 					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
 				}
