@@ -139,16 +139,16 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 					throw new SyntaxError('You should not set multiply entry script!');
 				}
 
-        if (matchedScriptSrc) {
-          // append the domain while the script not have a protocol prefix
-          if (!hasProtocol(matchedScriptSrc)) {
-            matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
-          }
+				if (matchedScriptSrc) {
+					// append the domain while the script not have a protocol prefix
+					if (!hasProtocol(matchedScriptSrc)) {
+						matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
+					}
 
-          matchedScriptSrc = parseUrl(matchedScriptSrc);
-        }
+					matchedScriptSrc = parseUrl(matchedScriptSrc);
+				}
 
-        entry = entry || matchedScriptEntry && matchedScriptSrc;
+				entry = entry || matchedScriptEntry && matchedScriptSrc;
 
 				if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');

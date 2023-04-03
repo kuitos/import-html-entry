@@ -90,9 +90,11 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 }
 
 // for prefetch
-export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback = () => {
-}) {
-
+export function getExternalScripts(
+	scripts,
+	fetch = defaultFetch,
+	errorCallback = () => {}
+) {
 	const fetchScript = scriptUrl => scriptCache[scriptUrl] ||
 		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => {
 			// usually browser treats 4xx and 5xx response of script loading as an error and will fire a script error event
