@@ -11,6 +11,7 @@ const SCRIPT_SRC_REGEX = /.*\ssrc=('|")?([^>'"\s]+)/;
 const SCRIPT_TYPE_REGEX = /.*\stype=('|")?([^>'"\s]+)/;
 const SCRIPT_ENTRY_REGEX = /.*\sentry\s*.*/;
 const SCRIPT_ASYNC_REGEX = /.*\sasync\s*.*/;
+const SCRIPT_CROSSORIGIN_REGEX = /.*\scrossorigin=('|")?use-credentials\1/;
 const SCRIPT_NO_MODULE_REGEX = /.*\snomodule\s*.*/;
 const SCRIPT_MODULE_REGEX = /.*\stype=('|")?module('|")?\s*.*/;
 const LINK_TAG_REGEX = /<(link)\s+.*?>/isg;
@@ -39,7 +40,7 @@ function isValidJavaScriptType(type) {
 }
 
 export const genLinkReplaceSymbol = (linkHref, preloadOrPrefetch = false) => `<!-- ${preloadOrPrefetch ? 'prefetch/preload' : ''} link ${linkHref} replaced by import-html-entry -->`;
-export const genScriptReplaceSymbol = (scriptSrc, async = false) => `<!-- ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
+export const genScriptReplaceSymbol = (scriptSrc, async = false, crossOrigin = false) => `<!-- ${ crossOrigin ? 'cors' : '' } ${async ? 'async' : ''} script ${scriptSrc} replaced by import-html-entry -->`;
 export const inlineScriptReplaceSymbol = `<!-- inline scripts replaced by import-html-entry -->`;
 export const genIgnoreAssetReplaceSymbol = url => `<!-- ignore asset ${url || 'file'} replaced by import-html-entry -->`;
 export const genModuleScriptReplaceSymbol = (scriptSrc, moduleSupport) => `<!-- ${moduleSupport ? 'nomodule' : 'module'} script ${scriptSrc} ignored by import-html-entry -->`;
@@ -139,16 +140,16 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 					throw new SyntaxError('You should not set multiply entry script!');
 				}
 
-        if (matchedScriptSrc) {
-          // append the domain while the script not have a protocol prefix
-          if (!hasProtocol(matchedScriptSrc)) {
-            matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
-          }
+				if (matchedScriptSrc) {
+					// append the domain while the script not have a protocol prefix
+					if (!hasProtocol(matchedScriptSrc)) {
+						matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI);
+					}
 
-          matchedScriptSrc = parseUrl(matchedScriptSrc);
-        }
+					matchedScriptSrc = parseUrl(matchedScriptSrc);
+				}
 
-        entry = entry || matchedScriptEntry && matchedScriptSrc;
+				entry = entry || matchedScriptEntry && matchedScriptSrc;
 
 				if (scriptIgnore) {
 					return genIgnoreAssetReplaceSymbol(matchedScriptSrc || 'js file');
@@ -160,8 +161,9 @@ export default function processTpl(tpl, baseURI, postProcessTemplate) {
 
 				if (matchedScriptSrc) {
 					const asyncScript = !!scriptTag.match(SCRIPT_ASYNC_REGEX);
-					scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc);
-					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript);
+					const crossOriginScript = !!scriptTag.match(SCRIPT_CROSSORIGIN_REGEX);
+					scripts.push((asyncScript || crossOriginScript) ? { async: asyncScript, src: matchedScriptSrc, crossOrigin: crossOriginScript } : matchedScriptSrc);
+					return genScriptReplaceSymbol(matchedScriptSrc, asyncScript, crossOriginScript);
 				}
 
 				return match;

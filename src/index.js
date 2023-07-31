@@ -57,7 +57,7 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 	const sourceUrl = isInlineCode(scriptSrc) ? '' : `//# sourceURL=${scriptSrc}\n`;
 
 	// 将 scopedGlobalVariables 拼接成变量声明，用于缓存全局变量，避免每次使用时都走一遍代理
-	const scopedGlobalVariableDefinition = scopedGlobalVariables.length ? `const {${scopedGlobalVariables.join(',')}}=this;` : ''
+	const scopedGlobalVariableDefinition = scopedGlobalVariables.length ? `const {${scopedGlobalVariables.join(',')}}=this;` : '';
 
 	// 通过这种方式获取全局 window，因为 script 也是在全局作用域下运行的，所以我们通过 window.proxy 绑定时也必须确保绑定到全局 window 上
 	// 否则在嵌套场景下， window.proxy 设置的是内层应用的 window，而代码其实是在全局作用域运行的，会导致闭包里的 window.proxy 取的是最外层的微应用的 proxy
@@ -93,8 +93,8 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback = () => {
 }) {
 
-	const fetchScript = scriptUrl => scriptCache[scriptUrl] ||
-		(scriptCache[scriptUrl] = fetch(scriptUrl).then(response => {
+	const fetchScript = (scriptUrl, opts) => scriptCache[scriptUrl] ||
+		(scriptCache[scriptUrl] = fetch(scriptUrl, opts).then(response => {
 			// usually browser treats 4xx and 5xx response of script loading as an error and will fire a script error event
 			// https://stackoverflow.com/questions/5625420/what-http-headers-responses-trigger-the-onerror-handler-on-a-script-tag/5625603
 			if (response.status >= 400) {
@@ -119,16 +119,18 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 				}
 			} else {
 				// use idle time to load async script
-				const { src, async } = script;
+				const { src, async, crossOrigin } = script;
+				const fetchOpts = crossOrigin ? { credentials: 'include' } : {};
+
 				if (async) {
 					return {
 						src,
 						async: true,
-						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src).then(resolve, reject))),
+						content: new Promise((resolve, reject) => requestIdleCallback(() => fetchScript(src, fetchOpts).then(resolve, reject))),
 					};
 				}
 
-				return fetchScript(src);
+				return fetchScript(src, fetchOpts);
 			}
 		},
 	));
