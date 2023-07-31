@@ -204,8 +204,8 @@ test('test process-tpl with entry specified', () => {
 		'http://kuitos.me/main-es5.js',
 		{
 			async: true,
-			crossOrigin: false,
 			src: 'http://kuitos.me/test-async.js',
+			crossOrigin: false,
 		},
 		'http://a.com/umi.js',
 		'http://kuitos.me/escape-character&.js',
