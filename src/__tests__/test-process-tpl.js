@@ -442,7 +442,7 @@ test('should work with huge html content', () => {
 	expect(during < 1000).toBeTruthy();
 });
 
-test('test resource mixing quotation marks', () => {
+test('test crossorigin use-credentials attribute', () => {
 
 	const tpl = '<!DOCTYPE html><html><head>\n' +
 		'\n' +
