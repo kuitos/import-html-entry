@@ -29,6 +29,9 @@
     "type": "git",
     "url": "git+https://github.com/kuitos/import-html-entry.git"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": [
     "html",
     "importer"
