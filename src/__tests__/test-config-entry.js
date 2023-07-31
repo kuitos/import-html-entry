@@ -9,7 +9,7 @@ test('config entry should return the expect html template', async () => {
 	};
 
 	const { template } = await importEntry(config, { fetch: async url => ({ text: async () => url }) });
-	expect(template).toBe('<style>/* http://kuitos.me/umi.css */http://kuitos.me/umi.css</style><style>/* http://kuitos.me/test.css */http://kuitos.me/test.css</style><main>config entry test</main><!--  script http://kuitos.me/umi.js replaced by import-html-entry --><!--  script http://kuitos.me/test.js replaced by import-html-entry -->');
+	expect(template).toBe('<style>/* http://kuitos.me/umi.css */http://kuitos.me/umi.css</style><style>/* http://kuitos.me/test.css */http://kuitos.me/test.css</style><main>config entry test</main><!--   script http://kuitos.me/umi.js replaced by import-html-entry --><!--   script http://kuitos.me/test.js replaced by import-html-entry -->');
 });
 
 test('config entry should return the expect html template with fetch option', async () => {
@@ -25,7 +25,7 @@ test('config entry should return the expect html template with fetch option', as
 			fn: async url => ({ text: async () => url }),
 		},
 	});
-	expect(template).toBe('<style>/* http://kuitos.me/umi.css */http://kuitos.me/umi.css</style><style>/* http://kuitos.me/test.css */http://kuitos.me/test.css</style><main>config entry test</main><!--  script http://kuitos.me/umi.js replaced by import-html-entry --><!--  script http://kuitos.me/test.js replaced by import-html-entry -->');
+	expect(template).toBe('<style>/* http://kuitos.me/umi.css */http://kuitos.me/umi.css</style><style>/* http://kuitos.me/test.css */http://kuitos.me/test.css</style><main>config entry test</main><!--   script http://kuitos.me/umi.js replaced by import-html-entry --><!--   script http://kuitos.me/test.js replaced by import-html-entry -->');
 });
 
 test('config entry should return the expect html template when using inline styles', async () => {
