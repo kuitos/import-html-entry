@@ -192,7 +192,6 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					noteGlobalProps(strictGlobal ? proxy : window);
 
 					try {
-						// bind window.proxy to change `this` reference in script
 						geval(scriptSrc, inlineScript);
 						const exports = proxy[getGlobalProp(strictGlobal ? proxy : window)] || {};
 						resolve(exports);
@@ -204,8 +203,11 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 				} else {
 					if (typeof inlineScript === 'string') {
 						try {
-							// bind window.proxy to change `this` reference in script
-							geval(scriptSrc, inlineScript);
+							if (scriptSrc?.src) {
+								geval(scriptSrc.src, inlineScript);
+							} else {
+								geval(scriptSrc, inlineScript);
+							}
 						} catch (e) {
 							// consistent with browser behavior, any independent script evaluation error should not block the others
 							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing normal script ${scriptSrc}`);
