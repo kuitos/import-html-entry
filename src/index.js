@@ -82,7 +82,10 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 			} else {
 				// external styles
 				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()).catch(e=> {
+    					e.message = `${e.message}:the failed resource is ${styleLink}`
+    					throw e
+  				}));
 			}
 
 		},
@@ -104,7 +107,8 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			return response.text();
 		}).catch(e => {
 			errorCallback();
-			throw e;
+			e.message = `${e.message}:the failed resource is ${scriptUrl}`
+			throw e
 		}));
 
 	return Promise.all(scripts.map(script => {
@@ -295,7 +299,10 @@ export default function importHTML(url, opts = {}) {
 					});
 				},
 			}));
-		}));
+		}).catch(e=> {
+    	e.message = `${e.message}:the failed resource is ${url}`
+    	throw e
+  	}));
 }
 
 export function importEntry(entry, opts = {}) {
