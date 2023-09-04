@@ -185,3 +185,60 @@ export function parseUrl(url){
 	const doc = parser.parseFromString(html, "text/html");
 	return doc.scripts[0].src;
 }
+
+class Deferred {
+	promise;
+	resolve;
+	reject;
+	constructor() {
+		this.promise = new Promise((resolve, reject) => {
+			this.resolve = resolve;
+			this.reject = reject;
+		});
+	}
+}
+
+export class AsyncQueue {
+	jobs = [];
+	push(worker) {
+		const deferrExec = new Deferred();
+		this.jobs.push({
+			worker,
+			resolve: deferrExec.resolve,
+		});
+		return worker
+			.then((res) => {
+				this.run(worker, res);
+				return deferrExec.promise;
+			})
+			.catch((err) => {
+				this.delete(worker);
+				deferrExec.reject(err);
+			});
+	}
+	delete(worker) {
+		const index = this.findIndex(worker);
+		if (index > -1) {
+			this.jobs.splice(index, 1);
+		}
+	}
+	run(worker, res) {
+		const i = this.findIndex(worker);
+		if (i === 0) {
+			let head = this.jobs[0];
+			head.res = res;
+			while (head?.hasOwnProperty("res")) {
+				head.resolve(head.res);
+				this.jobs.shift();
+				head = this.jobs[0];
+			}
+		} else {
+			this.jobs[i].res = res;
+		}
+	}
+	findIndex(worker) {
+		return this.jobs.findIndex((v) => v.worker === worker);
+	}
+}
+
+export const asyncQueue = new AsyncQueue()
