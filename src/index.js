@@ -246,6 +246,9 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 			}
 
 			return new Promise(resolve => schedule(0, success || resolve));
+		}).catch((e) => {
+			error();
+			throw e;
 		});
 }
 
