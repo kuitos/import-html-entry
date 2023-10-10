@@ -102,10 +102,11 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			}
 
 			return response.text();
-		}).catch(e => {
-			errorCallback();
-			throw e;
-		}));
+		}))
+		// .catch(e => {
+		//  errorCallback();
+	  //  throw e;
+	  //  });
 
 	return Promise.all(scripts.map(script => {
 
