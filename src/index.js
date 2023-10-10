@@ -90,8 +90,7 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 }
 
 // for prefetch
-export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback = () => {
-}) {
+export function getExternalScripts(scripts, fetch = defaultFetch) {
 
 	const fetchScript = (scriptUrl, opts) => scriptCache[scriptUrl] ||
 		(scriptCache[scriptUrl] = fetch(scriptUrl, opts).then(response => {
@@ -102,9 +101,6 @@ export function getExternalScripts(scripts, fetch = defaultFetch, errorCallback 
 			}
 
 			return response.text();
-		}).catch(e => {
-			errorCallback();
-			throw e;
 		}));
 
 	return Promise.all(scripts.map(script => {
@@ -167,7 +163,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		scopedGlobalVariables = [],
 	} = opts;
 
-	return getExternalScripts(scripts, fetch, error)
+	return getExternalScripts(scripts, fetch)
 		.then(scriptsText => {
 
 			const geval = (scriptSrc, inlineScript) => {
@@ -246,6 +242,9 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 			}
 
 			return new Promise(resolve => schedule(0, success || resolve));
+		}).catch((e) => {
+			error();
+			throw e;
 		});
 }
 
