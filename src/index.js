@@ -101,7 +101,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 			}
 
 			return response.text();
-		}))
+		}));
 
 	return Promise.all(scripts.map(script => {
 
