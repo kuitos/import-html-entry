@@ -1,4 +1,4 @@
-# import-html-entry
+# import-html-entry·
 Treats the index html as manifest and loads the assets(css,js), get the exports from entry script.
 
 ```html
