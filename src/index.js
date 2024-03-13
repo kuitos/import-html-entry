@@ -161,6 +161,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		}, afterExec = () => {
 		},
 		scopedGlobalVariables = [],
+		entryThrowNonBlock = false,
 	} = opts;
 
 	return getExternalScripts(scripts, fetch)
@@ -194,7 +195,11 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 					} catch (e) {
 						// entry error must be thrown to make the promise settled
 						console.error(`[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
-						throw e;
+						if(entryThrowNonBlock){
+							throwNonBlockingError(e, `[import-html-entry]: error occurs while executing entry script ${scriptSrc}`);
+						}else{
+							throw e;
+						}
 					}
 				} else {
 					if (typeof inlineScript === 'string') {
