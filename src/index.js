@@ -4,6 +4,7 @@
  * @since 2018-08-15 11:37
  */
 
+import { allSettled } from './allSettled';
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
 import {
 	defaultGetPublicPath,
@@ -75,7 +76,7 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
-	return Promise.all(styles.map(styleLink => {
+	return allSettled(styles.map(styleLink => {
 			if (isInlineCode(styleLink)) {
 				// if it is inline style
 				return getInlineCode(styleLink);
@@ -84,9 +85,15 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 				return styleCache[styleLink] ||
 					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
 			}
-
 		},
-	));
+	)).then(results => results.filter(result => {
+		// 忽略失败的请求，避免异常下载阻塞后续资源加载
+		if (result.status === 'rejected') {
+			Promise.reject(result.reason);
+		}
+		return result.status === 'fulfilled';
+
+	}).map(result => result.value));
 }
 
 // for prefetch
@@ -103,7 +110,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 			return response.text();
 		}));
 
-	return Promise.all(scripts.map(script => {
+	return allSettled(scripts.map(script => {
 
 			if (typeof script === 'string') {
 				if (isInlineCode(script)) {
@@ -129,7 +136,13 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 				return fetchScript(src, fetchOpts);
 			}
 		},
-	));
+	)).then(results => results.filter(result => {
+		// 忽略失败的请求，避免异常下载阻塞后续资源加载
+		if (result.status === 'rejected') {
+			Promise.reject(result.reason);
+		}
+		return result.status === 'fulfilled';
+	}).map(result => result.value));
 }
 
 function throwNonBlockingError(error, msg) {

@@ -5,16 +5,14 @@
 	<title>index</title>
 </head>
 <body>
-<script src="../dist/import-html-entry.js"></script>
-<script>
-
-	importHTML('./template.html').then(res => {
-		console.log(res.template);
-		res.execScripts().then(exports => {
-			console.log(exports);
+<script type="module">
+	import('../dist/index.js').then(({importEntry}) => {
+		importEntry('./template.html').then(res => {
+			res.execScripts().then(exports => {
+				console.log(exports);
+			});
 		});
 	});
-
 </script>
 </body>
 </html>
