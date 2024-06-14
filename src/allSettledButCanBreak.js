@@ -1,12 +1,14 @@
-export function allSettled(promises) {
-	return typeof Promise.allSettled === 'function'
-		? Promise.allSettled(promises)
-		: Promise.all(promises.map(promise => {
+export function allSettledButCanBreak(promises, shouldBreak) {
+	return Promise.all(promises.map((promise, i) => {
 			return promise
 				.then(value => {
 					return { status: 'fulfilled', value };
 				})
 				.catch(reason => {
+					if (shouldBreak?.(i)) {
+						throw reason;
+					}
+
 					return { status: 'rejected', reason };
 				});
 		}));

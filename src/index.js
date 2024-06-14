@@ -4,7 +4,7 @@
  * @since 2018-08-15 11:37
  */
 
-import { allSettled } from './allSettled';
+import { allSettledButCanBreak } from './allSettledButCanBreak';
 import processTpl, { genLinkReplaceSymbol, genScriptReplaceSymbol } from './process-tpl';
 import {
 	defaultGetPublicPath,
@@ -42,8 +42,10 @@ function getEmbedHTML(template, styles, opts = {}) {
 
 	return getExternalStyleSheets(styles, fetch)
 		.then(styleSheets => {
-			embedHTML = styles.reduce((html, styleSrc, i) => {
-				html = html.replace(genLinkReplaceSymbol(styleSrc), isInlineCode(styleSrc) ? `${styleSrc}` : `<style>/* ${styleSrc} */${styleSheets[i]}</style>`);
+			embedHTML = styleSheets.reduce((html, styleSheet) => {
+				const styleSrc = styleSheet.src;
+				const styleSheetContent = styleSheet.value;
+				html = html.replace(genLinkReplaceSymbol(styleSrc), isInlineCode(styleSrc) ? `${styleSrc}` : `<style>/* ${styleSrc} */${styleSheetContent}</style>`);
 				return html;
 			}, embedHTML);
 			return embedHTML;
@@ -76,17 +78,37 @@ function getExecutableScript(scriptSrc, scriptText, opts = {}) {
 
 // for prefetch
 export function getExternalStyleSheets(styles, fetch = defaultFetch) {
-	return allSettled(styles.map(styleLink => {
+	return allSettledButCanBreak(styles.map(async styleLink => {
 			if (isInlineCode(styleLink)) {
 				// if it is inline style
 				return getInlineCode(styleLink);
 			} else {
 				// external styles
 				return styleCache[styleLink] ||
-					(styleCache[styleLink] = fetch(styleLink).then(response => response.text()));
+					(styleCache[styleLink] = fetch(styleLink).then(response => {
+						if (response.status >= 400) {
+							throw new Error(`${styleLink} load failed with status ${response.status}`);
+						}
+						return response.text();
+					}).catch(e => {
+						try {
+							e.message = `${styleLink} ${e.message}`;
+						} catch (_) {
+							// 有的异常 e.message 可能是 readonly 这时不做任何操作
+						}
+						throw e;
+					}));
 			}
 		},
-	)).then(results => results.filter(result => {
+	)).then(results => results.map((result, i) => {
+		if (result.status === 'fulfilled') {
+			result.value = {
+				src: styles[i],
+				value: result.value,
+			};
+		}
+		return result;
+	}).filter(result => {
 		// 忽略失败的请求，避免异常下载阻塞后续资源加载
 		if (result.status === 'rejected') {
 			Promise.reject(result.reason);
@@ -97,7 +119,7 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 }
 
 // for prefetch
-export function getExternalScripts(scripts, fetch = defaultFetch) {
+export function getExternalScripts(scripts, fetch = defaultFetch, entry) {
 
 	const fetchScript = (scriptUrl, opts) => scriptCache[scriptUrl] ||
 		(scriptCache[scriptUrl] = fetch(scriptUrl, opts).then(response => {
@@ -108,9 +130,18 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 			}
 
 			return response.text();
+		}).catch(e => {
+			try {
+				e.message = `${scriptUrl} ${e.message}`;
+			} catch (_) {
+				// 有的异常 e.message 可能是 readonly 这时不做任何操作
+			}
+			throw e;
 		}));
 
-	return allSettled(scripts.map(script => {
+	// entry js 下载失败应该直接 break
+	const shouldBreak = (i) => scripts[i] === entry;
+	return allSettledButCanBreak(scripts.map(async script => {
 
 			if (typeof script === 'string') {
 				if (isInlineCode(script)) {
@@ -136,21 +167,23 @@ export function getExternalScripts(scripts, fetch = defaultFetch) {
 				return fetchScript(src, fetchOpts);
 			}
 		},
-	)).then(results => results.map((result, i) => {
-		if (result.status === 'fulfilled') {
-			result.value = {
-				src: scripts[i],
-				value: result.value,
-			};
-		}
-		return result;
-	}).filter(result => {
-		// 忽略失败的请求，避免异常下载阻塞后续资源加载
-		if (result.status === 'rejected') {
-			Promise.reject(result.reason);
-		}
-		return result.status === 'fulfilled';
-	}).map(result => result.value));
+	), shouldBreak)
+		.then(results =>
+			results.map((result, i) => {
+				if (result.status === 'fulfilled') {
+					result.value = {
+						src: scripts[i],
+						value: result.value,
+					};
+				}
+				return result;
+			}).filter(result => {
+				// 忽略失败的请求，避免异常下载阻塞后续资源加载
+				if (result.status === 'rejected') {
+					Promise.reject(result.reason);
+				}
+				return result.status === 'fulfilled';
+			}).map(result => result.value));
 }
 
 function throwNonBlockingError(error, msg) {
@@ -184,7 +217,7 @@ export function execScripts(entry, scripts, proxy = window, opts = {}) {
 		scopedGlobalVariables = [],
 	} = opts;
 
-	return getExternalScripts(scripts, fetch)
+	return getExternalScripts(scripts, fetch, entry)
 		.then(scriptsText => {
 
 			const geval = (scriptSrc, inlineScript) => {
