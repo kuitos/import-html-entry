@@ -140,7 +140,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch, entry) {
 		}));
 
 	// entry js 下载失败应该直接 break
-	const shouldBreak = (i) => scripts[i] === entry;
+	const shouldBreakWhileError = (i) => scripts[i] === entry;
 	return allSettledButCanBreak(scripts.map(async script => {
 
 			if (typeof script === 'string') {
@@ -167,7 +167,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch, entry) {
 				return fetchScript(src, fetchOpts);
 			}
 		},
-	), shouldBreak)
+	), shouldBreakWhileError)
 		.then(results =>
 			results.map((result, i) => {
 				if (result.status === 'fulfilled') {

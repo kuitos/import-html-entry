@@ -1,11 +1,11 @@
-export function allSettledButCanBreak(promises, shouldBreak) {
+export function allSettledButCanBreak(promises, shouldBreakWhileError) {
 	return Promise.all(promises.map((promise, i) => {
 			return promise
 				.then(value => {
 					return { status: 'fulfilled', value };
 				})
 				.catch(reason => {
-					if (shouldBreak?.(i)) {
+					if (shouldBreakWhileError?.(i)) {
 						throw reason;
 					}
 
