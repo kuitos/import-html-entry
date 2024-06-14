@@ -94,7 +94,7 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 						try {
 							e.message = `${styleLink} ${e.message}`;
 						} catch (_) {
-							// 有的异常 e.message 可能是 readonly 这时不做任何操作
+							// e.message 可能是 readonly，此时会触发异常
 						}
 						throw e;
 					}));
@@ -134,7 +134,7 @@ export function getExternalScripts(scripts, fetch = defaultFetch, entry) {
 			try {
 				e.message = `${scriptUrl} ${e.message}`;
 			} catch (_) {
-				// 有的异常 e.message 可能是 readonly 这时不做任何操作
+				// e.message 可能是 readonly，此时会触发异常
 			}
 			throw e;
 		}));
