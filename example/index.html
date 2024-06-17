@@ -6,12 +6,21 @@
 </head>
 <body>
 <script type="module">
-	import('../dist/index.js').then(({importEntry}) => {
+	window.onerror = e => {
+		console.log('error', e.message);
+	};
+	window.onunhandledrejection = (e) => {
+		console.log('unhandledrejection', e.reason.message);
+	};
+
+	import('../dist/index.js').then(({ importEntry }) => {
 		importEntry('./template.html').then(res => {
 			console.log(res.template);
-			res.execScripts().then(exports => {
+			return res.execScripts().then(exports => {
 				console.log(exports);
 			});
+		}).catch(e => {
+			console.log('importEntry failed', e.message);
 		});
 	});
 </script>

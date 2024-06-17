@@ -92,7 +92,9 @@ export function getExternalStyleSheets(styles, fetch = defaultFetch) {
 						return response.text();
 					}).catch(e => {
 						try {
-							e.message = `${styleLink} ${e.message}`;
+							if (e.message.indexOf(styleLink) === -1) {
+								e.message = `${styleLink} ${e.message}`;
+							}
 						} catch (_) {
 							// e.message 可能是 readonly，此时会触发异常
 						}
@@ -132,7 +134,9 @@ export function getExternalScripts(scripts, fetch = defaultFetch, entry) {
 			return response.text();
 		}).catch(e => {
 			try {
-				e.message = `${scriptUrl} ${e.message}`;
+				if (e.message.indexOf(scriptUrl) === -1) {
+					e.message = `${scriptUrl} ${e.message}`;
+				}
 			} catch (_) {
 				// e.message 可能是 readonly，此时会触发异常
 			}
